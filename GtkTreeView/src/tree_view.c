@@ -80,7 +80,7 @@ main(int argc, char **argv){
 
 	init_list(list);
 	add_to_list(list, "Paweł Sobótka");
-	add_to_list(list, "majster Klepka");
+	add_to_list(list, "Majster Klepka");
 	add_to_list(list,"MajsterKlepka");
 	add_to_list(list, "StaryWandal");
 
