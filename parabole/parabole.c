@@ -9,21 +9,32 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
+
+int file_exist(const char *file);
 
 int
 main(int argc, char ** argv){
 
-
 	FILE *fp;
 	long double x1, x2;
-	const char* file= "output.txt";
+	char* file = malloc(32*sizeof(char));
 	long double y, x;
 	long int ilosc = 0, k = 0;
 	long double przedzial;
 	long double krok;
+	printf("Program generuje serię danych\ndla równania y= x^2\n");
+	printf("podaj nazwę pliku wyjściowego : ");
+	scanf("%s", file);
+
+	if (file_exist(file)){
+		printf("plik o nazwie %s istnieje!\nKończę działanie programu...", file);
+		return EXIT_FAILURE;
+	}
+
 	fp = fopen(file, "w");
 
-	printf("podaj zakres x(x1 x2): ");
+	printf("podaj zakres zmiennej x(x1 x2): ");
 
 	scanf("%Lf %Lf", &x1, &x2);
 
@@ -41,7 +52,23 @@ main(int argc, char ** argv){
 		k += 1;
 	}
 
+	printf("Zakończono gewnerowanie serii danych...\n");
 	fclose(fp);
+	free(file);
 
 	return EXIT_SUCCESS;
+}
+
+int file_exist(const char *file){
+	FILE *fop;
+	int odp = 0;
+	fop = fopen(file, "r");
+
+	if (fop != NULL){
+		odp = 1;
+		fclose(fop);
+	}else
+		odp = 0;
+
+	return odp;
 }
