@@ -1,0 +1,1 @@
+parabole.o: ../parabole.c
