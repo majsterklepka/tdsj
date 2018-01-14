@@ -3,6 +3,7 @@
  *
  *  Created on: 13 sty 2018
  *      Author: majsterklepka
+ *     License: GPL-3.0
  */
 
 #include <stdlib.h>
@@ -23,7 +24,7 @@ main(int argc, char ** argv){
 	long int ilosc = 0, k = 0;
 	long double przedzial;
 	long double krok;
-	printf("Program generuje serię danych\ndla równania y= x^2\n");
+	printf("Program generuje serię danych\ndla równania y= x^2\nAutor: Majster Klepka\nLicencja: GPL-3.0\n---\n");
 	printf("podaj nazwę pliku wyjściowego : ");
 	scanf("%s", file);
 
