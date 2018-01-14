@@ -8,19 +8,18 @@
 #include <gtk/gtk.h>
 
 enum {
-	LIST_ITEM = 0,
-	N_COLUMNS
+	LIST_ITEM = 0, N_COLUMNS
 };
 
-void
-init_list(GtkWidget *list){
+void init_list(GtkWidget *list) {
 
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkListStore *store;
 
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("Elementy listy", renderer, "text", LIST_ITEM, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Elementy listy",
+			renderer, "text", LIST_ITEM, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
 	store = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING);
@@ -28,8 +27,7 @@ init_list(GtkWidget *list){
 	g_object_unref(store);
 }
 
-void
-add_to_list(GtkWidget *list, const gchar *str){
+void add_to_list(GtkWidget *list, const gchar *str) {
 
 	GtkListStore *store;
 	GtkTreeIter iter;
@@ -41,27 +39,25 @@ add_to_list(GtkWidget *list, const gchar *str){
 
 }
 
-void
-on_changed(GtkWidget *widget, gpointer label){
+void on_changed(GtkWidget *widget, gpointer label) {
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	gchar *value;
-	if(gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model, &iter)){
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), &model,
+			&iter)) {
 		gtk_tree_model_get(model, &iter, LIST_ITEM, &value, -1);
 		gtk_label_set_text(GTK_LABEL(label), value);
 		g_free(value);
 	}
 }
 
-int
-main(int argc, char **argv){
+int main(int argc, char **argv) {
 
 	GtkWidget *window;
 	GtkWidget *list;
 	GtkWidget *vbox;
 	GtkWidget *label;
 	GtkTreeSelection *selection;
-
 
 	gtk_init(&argc, &argv);
 
@@ -83,13 +79,14 @@ main(int argc, char **argv){
 	init_list(list);
 	add_to_list(list, "Paweł Sobótka");
 	add_to_list(list, "Majster Klepka");
-	add_to_list(list,"MajsterKlepka");
+	add_to_list(list, "MajsterKlepka");
 	add_to_list(list, "StaryWandal");
 
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
 
 	g_signal_connect(selection, "changed", G_CALLBACK(on_changed), label);
-	g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit),
+			NULL);
 
 	gtk_widget_show_all(window);
 	gtk_main();
