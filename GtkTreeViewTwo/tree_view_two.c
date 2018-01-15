@@ -68,12 +68,12 @@ int main(int argc, char **argv) {
 	gtk_window_set_title(GTK_WINDOW(window), "GtkTreeView - Spis cudzołożnic");
 	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 	gtk_container_set_border_width(GTK_CONTAINER(window), 10);
-	gtk_window_set_default_size(GTK_WINDOW(window), 400, 250);
+	gtk_window_set_default_size(GTK_WINDOW(window), 350, 200);
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(list), TRUE);
 	label = gtk_label_new("");
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), list, TRUE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 5);
+	gtk_box_pack_end(GTK_BOX(vbox), label, TRUE, TRUE, 2);
 	gtk_box_set_homogeneous(GTK_BOX(vbox), FALSE);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 
