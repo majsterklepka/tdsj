@@ -8,9 +8,6 @@
 
 #include <gtk/gtk.h>
 
-enum {
-	LIST_ITEM = 0, N_COLUMNS
-};
 GtkWidget *list;
 
 void append_item(GtkWidget *widget, gpointer entry) {
@@ -23,7 +20,9 @@ void append_item(GtkWidget *widget, gpointer entry) {
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(list)));
 
 	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, LIST_ITEM, str, -1);
+	for (int i = 0; i < 3;i++){
+		gtk_list_store_set(store, &iter, i, str, -1);
+	}
 	gtk_entry_set_text(entry, "");
 }
 
@@ -64,14 +63,20 @@ void remove_all(GtkWidget *widget, gpointer selection){
 void init_list(GtkWidget *list){
 
 	GtkCellRenderer 	*render;
-	GtkTreeViewColumn 	*column;
+	GtkTreeViewColumn 	*col1;
+	GtkTreeViewColumn 	*col2;
+	GtkTreeViewColumn 	*col3;
 	GtkListStore 		*store;
 
 	render = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("Artysta... i stara szafa.", render, "text", LIST_ITEM, NULL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
+	col1 = gtk_tree_view_column_new_with_attributes("Artysta... i stara szafa.", render, "text", 0, NULL);
+	col2 = gtk_tree_view_column_new_with_attributes("Artysta... ", render, "text", 1, NULL);
+	col3 = gtk_tree_view_column_new_with_attributes("Stara szafa.", render, "text", 2, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(list), col1);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(list), col2);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(list), col3);
 
-	store = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING);
+	store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(store));
 
 	g_object_unref(store);
