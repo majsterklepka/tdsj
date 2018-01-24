@@ -1,6 +1,6 @@
 /*
  * main.c
- *
+ *	28,7 x % HbA1c – 46,7 = average glycemia
  *  Created on: 24 sty 2018
  *      Author: majsterklepka
  *     License: GPL-3.0
