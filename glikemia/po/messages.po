@@ -1,0 +1,92 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Majster Klepka <starywandal@onet.pl>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-01-25 09:12+0100\n"
+"PO-Revision-Date: 2018-01-25 09:18+0100\n"
+"Last-Translator: Majster Klepka <starywandal@onet.pl>\n"
+"Language-Team: polski <starywandal@onet.pl>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Gtranslator 2.91.7\n"
+
+#: main.c:22
+#, c-format
+msgid "Welcome to the App Diabetes!\n"
+msgstr "Witaj w aplikacji Cukrzyk!\n"
+
+#: main.c:23
+#, c-format
+msgid "==========================\n"
+msgstr ""
+
+#: main.c:24
+#, c-format
+msgid "Author: Majster Klepka\n"
+msgstr "Autor Majster Klepka\n"
+
+#: main.c:25
+#, c-format
+msgid "License: GPL-3.0\n"
+msgstr "Licencja: GPL-3.0\n"
+
+#: main.c:26
+#, c-format
+msgid "Copyright: (C) 2018 Paweł Sobótka\n"
+msgstr "Prawa autorskie: (C) 2018 Paweł Sobótka\n"
+
+#: main.c:27
+msgid ""
+"Usage: \n"
+"\tenter your own level %HbA1c obtained from\n"
+"\tthe medical analysis laboratory\n"
+msgstr ""
+"Użycie:\n"
+"\twprowadź swój własny poziom %HbA1c otrzymany od\n"
+"\tlabolatorium analiz medycznych\n"
+
+#: main.c:28
+#, c-format
+msgid "\tand if you do not have it yet ...\n"
+msgstr "a jeśli go jeszcze nie masz...\n"
+
+#: main.c:29
+#, c-format
+msgid "\tthen report to your doctor for a referral\t\n"
+msgstr "zgłoś się do swojego lekarza po skierowanie na badanie\n"
+
+#: main.c:30
+#, c-format
+msgid "\tand take the test immediately!\n"
+msgstr "i wykonaj badanie natychmiast!\n"
+
+#: main.c:32
+msgid "enter value of % HbA1c: "
+msgstr "wprowadź wartość % HbA1c: "
+
+#: main.c:35
+#, c-format
+msgid ""
+"Your result of the average three-month glycemia\n"
+"that is: %.2f mg/dL\n"
+msgstr ""
+"Twój wynik średniej trzymiesięcznej z glikemii\n"
+"to: %.2f mg/dL\n"
+
+#: main.c:37
+#, c-format
+msgid ""
+"Thank you for using this short program...\n"
+"Author.\n"
+msgstr ""
+"dziękuję za wykorzystanie tego krótkiego programu...\n"
+"Autor.\n"

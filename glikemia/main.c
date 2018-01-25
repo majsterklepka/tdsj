@@ -10,42 +10,31 @@
 #include <locale.h>
 #include <stdio.h>
 #include <string.h>
+#include <libintl.h>
 
 int main(int argc, char *argv[]) {
-	char * locale_info = setlocale(LC_ALL, "");
-	char *locale = "pl_PL.UTF-8";
-	char *saved_locale = strdup(locale_info);
-	double HbA1c = 0;
-	float average_glycemia;
-	if (strcmp(saved_locale, locale) != 0) {
-		printf("I setup application language to : %s\n", locale);
-		locale_info = setlocale(LC_ALL, locale);
-		if (locale_info == NULL) {
-			printf(
-					"You don't have Polish locale installed!!!\nPlease, install it!\nExit!\n");
-			return EXIT_FAILURE;
-		}
-	}
-	char *info_line[] =
-			{ "Witaj w aplikacji Cukrzyk!\n", "==========================\n",
-					"Autor programu: Majster Klepka\n", "Licencja: GPL-3.0\n",
-					"Prawa Autorskie: (C) 2018 Paweł Sobótka\n",
-					"Użycie: \nwprowadź swój własny poziom \%HbA1c otrzymany z labolatorium analiz medycznych\n",
-					"a jeśli go jeszcze nie posiadasz...\n",
-					"to zgłoś się do lekarza POZ po skierowanie na badanie\n",
-					"i niezwłocznie wykonaj badanie!\n",
-					"----------------------------\n" };
-	int i = 0;
-	while (*(info_line + i) != NULL){
-		printf("%s", info_line[i]);
-		i++;
-	}
-	printf("wprowadź \%HbA1c: ");
+
+	setlocale(LC_ALL, "");
+	bindtextdomain("glikemia", "./locale");
+	textdomain("glikemia");
+	double average_glycemia = 0;
+	double HbA1c;
+	printf( gettext("Welcome to the App Diabetes!\n"));
+	printf(gettext("==========================\n"));
+	printf(gettext("Author: Majster Klepka\n"));
+	printf(gettext("License: GPL-3.0\n"));
+	printf(gettext("Copyright: (C) 2018 Paweł Sobótka\n"));
+	printf(gettext("Usage: \n\tenter your own level \%HbA1c obtained from\n\tthe medical analysis laboratory\n"));
+	printf(gettext("\tand if you do not have it yet ...\n"));
+	printf(gettext("\tthen report to your doctor for a referral\t\n"));
+	printf(gettext("\tand take the test immediately!\n"));
+	printf("----------------------------\n");
+	printf(gettext("enter value of \% HbA1c: "));
 	scanf("%lf", &HbA1c);
 	average_glycemia = 28.7 * HbA1c - 46.7;
-	printf("Twój wynik średniej trzymiesięcznej glikemii\nto %.2f mg/dL\n", average_glycemia);
+	printf(gettext("Your result of the average three-month glycemia\nthat is: %.2f mg/dL\n"), average_glycemia);
 	printf("----------------------------\n");
-	printf("Dziękuję za skorzystanie z tego krótkiego programu....\nAutor.\n");
+	printf(gettext("Thank you for using this short program...\nAuthor.\n"));
 
 	return EXIT_SUCCESS;
 }
