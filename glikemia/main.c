@@ -1,5 +1,5 @@
-/*
- * main.c
+/* main.c
+ *
  *	28,7 x % HbA1c – 46,7 = average glycemia
  *  Created on: 24 sty 2018
  *      Author: majsterklepka
@@ -12,13 +12,32 @@
 #include <string.h>
 #include <libintl.h>
 
-int main(int argc, char *argv[]) {
+/*! \file main.c
+ source file with main body of aplications
+ */
 
+/*! \fn int main(int argc, char *argv[]) 
+  processed calculation of average three-month glycemia
+ 
+  appliaction has support for internationalization
+  with use of gettext & speaks in two languages
+  English and Polish. HbA1c is medical literal symbol
+  of processed parametr
+ */
+
+/*!\f$average\_glycemia = 28.7 * HbA1c - 46.7\f$ */
+
+/*! output is dispaly in mg/dL unit */
+
+int main(int argc, char *argv[]) {
+	
 	setlocale(LC_ALL, "");
 	bindtextdomain("glikemia", "./locale");
-	textdomain("glikemia");
-	double average_glycemia = 0;
-	double HbA1c;
+	textdomain("glikemia"); 
+	
+	double average_glycemia = 0; 
+	double HbA1c; 
+	
 	printf( gettext("Welcome to the App Diabetes!\n"));
 	printf(gettext("==========================\n"));
 	printf(gettext("Author: Majster Klepka\n"));
