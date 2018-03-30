@@ -1,4 +1,4 @@
-main.o: ../main.c /usr/include/gtk-3.0/gtk/gtk.h \
+main.o: ../main.c ../iban_val.h /usr/include/gtk-3.0/gtk/gtk.h \
  /usr/include/gtk-3.0/gdk/gdk.h /usr/include/gtk-3.0/gdk/gdkconfig.h \
  /usr/include/glib-2.0/glib.h /usr/include/glib-2.0/glib/galloca.h \
  /usr/include/glib-2.0/glib/gtypes.h \
@@ -579,6 +579,8 @@ main.o: ../main.c /usr/include/gtk-3.0/gtk/gtk.h \
  /usr/include/gtk-3.0/gtk/deprecated/gtkvseparator.h \
  /usr/include/gtk-3.0/gtk/gtk-autocleanups.h \
  /usr/include/glib-2.0/glib/gi18n.h
+
+../iban_val.h:
 
 /usr/include/gtk-3.0/gtk/gtk.h:
 
