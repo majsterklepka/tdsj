@@ -67,6 +67,8 @@ int main(int argc, char **argv) {
 	status = g_application_run(G_APPLICATION(app->application), argc, argv);
 
 	g_object_unref(app->application);
+	g_object_unref(app->builder);
+	g_slist_free(app->objects);
 
 	return status;
 }
