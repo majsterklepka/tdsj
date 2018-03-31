@@ -13,16 +13,5 @@
 #ifndef IBAN_VAL_H_
 #define IBAN_VAL_H_
 
-#define GET_UI_ELEMENT(TYPE, ELEMENT)	TYPE *ELEMENT = (TYPE *) app_get_ui_element(app, #ELEMENT);
-
-typedef struct app_ {
-	GtkBuilder *builder;
-	GSList *object;
-}App;
-
-GApplication *application;
-
-void app_init(App *);
-GObject *app_get_ui_element(App *, const gchar *);
 
 #endif /* IBAN_VAL_H_ */
