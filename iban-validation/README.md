@@ -30,6 +30,8 @@ Function above working perfectly. I would get a typedef struct which will be con
         }App;
 
 but with 
+
         GtkApplication *
+
 it doesn't works.
  
