@@ -18,10 +18,11 @@
 typedef struct app_ {
 	GtkBuilder *builder;
 	GSList *objects;
+	GtkApplication *application;
 }App;
 
 
-void app_init(App *, GApplication *);
+void app_init(App *);
 
 GObject *get_ui_element(App*, const gchar *);
 
