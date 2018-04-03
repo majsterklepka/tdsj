@@ -8,6 +8,11 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 #include <locale.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
 
 
 #ifndef IBAN_VAL_H_

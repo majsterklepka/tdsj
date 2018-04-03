@@ -8,6 +8,7 @@
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
+    <property name="decorated">False</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -53,6 +54,9 @@
                       <object class="GtkLabel" id="label1">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="margin_left">10</property>
+                        <property name="margin_right">10</property>
                         <property name="hexpand">True</property>
                         <property name="label" translatable="yes">label</property>
                       </object>
@@ -108,6 +112,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <signal name="clicked" handler="button1_clicked_cb" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -121,6 +126,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <signal name="clicked" handler="button2_clicked_cb" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -134,7 +140,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <signal name="clicked" handler="close_activate" swapped="no"/>
+                    <signal name="clicked" handler="button3_clicked_cb" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -200,28 +206,8 @@
         </child>
       </object>
     </child>
-    <child type="titlebar">
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkLabel" id="title">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">center</property>
-            <property name="hexpand">True</property>
-            <property name="vexpand">True</property>
-            <property name="label" translatable="yes">label</property>
-            <property name="single_line_mode">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
+    <child>
+      <placeholder/>
     </child>
   </object>
 </interface>
