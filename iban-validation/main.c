@@ -104,7 +104,7 @@ int iban_validation(const char *iban)
 void show_icon(gint input, App *app)
 {
 	gchar *image_1 = g_build_path(G_DIR_SEPARATOR_S, "./icons", "ikona-ok-48x48.png", NULL);
-	gchar *image_2 = g_build_path(G_DIR_SEPARATOR_S, "./icons", "ikona-no-ok-48x48.png", NULL);
+	gchar *image_2 = g_build_path(G_DIR_SEPARATOR_S, "./icons", "ikona-error-48x48.png", NULL);
 	UI_ELEMENT(GtkImage, image1);
 	if (input == 0)
 	{
@@ -118,27 +118,46 @@ void show_icon(gint input, App *app)
 				gtk_image_set_from_pixbuf(image1, pixbuf);
 				gtk_widget_show(GTK_WIDGET(image1));
 	}
+}
 
-
+void show_text(int input, App *app)
+{
+	UI_ELEMENT(GtkLabel, label1);
+	const gchar *text1 = _("To nie jest numer IBAN");
+	const gchar *text2 = _("podany ciąg znaków zawiera błędy");
+	const gchar *text3 = _("To jest poprawny numer IBAN");
+	const gchar *text4 = _("Wprowadź numer IBAN w pole powyżej\npamiętaj aby było to 28 znaków\nz dwuliterowym kodem kraju przed ciągiem cyfr\nmożesz wprowadzić IBAN rozdzielony spacjami na grupy...");
+	switch(input){
+		case 0:
+			gtk_label_set_text(label1, text1);
+			break;
+		case 1:
+			gtk_label_set_text(label1, text3);
+			break;
+		case -1:
+			gtk_label_set_text(label1, text2);
+			break;
+		default:
+			gtk_label_set_text(label1, text4);
+	}
 }
 
 void button1_clicked_cb(GtkWidget * widget, App *app)
 {
 	UI_ELEMENT(GtkEntry, entry1);
-	UI_ELEMENT(GtkLabel, label1);
 	const gchar *text = gtk_entry_get_text(entry1);
 	int response = iban_validation(text);
 	if (response == 0){
-		gtk_label_set_text(label1, _("To nie jest numer IBAN!"));
+		show_text(response, app);
 		show_icon(2, app);
 	}else if (response == -1){
-		gtk_label_set_text(label1, _("podany ciąg znaków zawiera błędy"));
+		show_text(response, app);
 		show_icon(2, app);
 	}else if (response == 1){
-		gtk_label_set_text(label1, _("To jest porawny numer IBAN"));
+		show_text(response, app);
 		show_icon(1, app);
 	}else{
-		gtk_label_set_text(label1, _("To nie jest numer IBAN!"));
+		show_text(0, app);
 		show_icon(2, app);
 	}
 
@@ -149,9 +168,8 @@ void button1_clicked_cb(GtkWidget * widget, App *app)
 void button2_clicked_cb(GtkWidget * widget, App *app)
 {
 	UI_ELEMENT(GtkEntry, entry1);
-	UI_ELEMENT(GtkLabel, label1);
 	gtk_entry_set_text(entry1, " ");
-	gtk_label_set_text(label1, " ");
+	show_text(2,app);
 	show_icon(0, app);
 
 }
@@ -168,12 +186,19 @@ static void activate(GApplication *application, App *app) {
 	UI_ELEMENT(GtkButton, button2);
 	UI_ELEMENT(GtkButton, button3);
 	UI_ELEMENT(GtkImage, image1);
-	UI_ELEMENT(GtkLabel, label1);
+	UI_ELEMENT(GtkLabel, label2);
+	UI_ELEMENT(GtkLinkButton, linkbutton1);
 
 	gtk_button_set_label(button1, _("Weryfikuj"));
 	gtk_button_set_label(button2, _("Wyczyść"));
 	gtk_button_set_label(button3, _("Zamknij"));
-	gtk_label_set_text(label1, " ");
+
+	gtk_label_set_text(label2, "(C)2018 Paweł Sobótka");
+	gtk_button_set_label(GTK_BUTTON(linkbutton1), "MajsterKlepka GitHub Pages");
+	gtk_link_button_set_uri(linkbutton1, "https://majsterklepka.github.io");
+
+	show_text(2,app);
+
 	gtk_widget_hide(GTK_WIDGET(image1));
 
 	gtk_application_add_window(GTK_APPLICATION(app->application), window);
