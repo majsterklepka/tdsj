@@ -41,8 +41,8 @@ GObject *get_ui_element(App *app, const gchar *name)
 
 int iban_validation(const char *iban)
 {
-	char number[29];
-	int len, i;
+	char number[64];
+	int len, i, k;
 	long int sum;;
 
 	char prefix[5];
@@ -53,13 +53,23 @@ int iban_validation(const char *iban)
 	prefix[0] = '\0';
 	suffix[0] = '\0';
 	output[0] = '\0';
+
 	len = 0;
 	i = 0;
+	k = 0;
 
-	strcpy(number, iban);
-	number[28] ='\0';
+	for ( i = 0; i < strlen(iban); i++)
+	{
+		if(!isspace(*(iban+ i)))
+		{
+			number[k] = *(iban + i);
+			k++;
+		}
+	}
 
-	len = strlen(iban);
+	number[k] = '\0';
+
+	len = strlen(number);
 	if ( len != 28 ){
 		return 0;
 	}
@@ -140,8 +150,8 @@ void button2_clicked_cb(GtkWidget * widget, App *app)
 {
 	UI_ELEMENT(GtkEntry, entry1);
 	UI_ELEMENT(GtkLabel, label1);
-	gtk_entry_set_text(entry1, "");
-	gtk_label_set_text(label1, "");
+	gtk_entry_set_text(entry1, " ");
+	gtk_label_set_text(label1, " ");
 	show_icon(0, app);
 
 }
