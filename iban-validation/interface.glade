@@ -38,6 +38,8 @@
                     <property name="max_length">40</property>
                     <property name="width_chars">45</property>
                     <property name="max_width_chars">45</property>
+                    <signal name="changed" handler="entry1_changed_cb" swapped="no"/>
+                    <signal name="insert-text" handler="insert_text_handler" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>

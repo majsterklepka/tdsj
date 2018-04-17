@@ -101,6 +101,33 @@ int iban_validation(const char *iban)
 
 }
 
+
+void
+insert_text_handler (GtkEditable *editable,
+                     const gchar *text,
+                     gint         length,
+                     gint        *position,
+                     gpointer     data)
+{
+	gchar *result = g_utf8_strup (text, length);
+
+
+	g_signal_handlers_block_by_func (editable,
+                               (gpointer) insert_text_handler, data);
+	gtk_editable_insert_text (editable, result, length, position);
+	g_signal_handlers_unblock_by_func (editable,
+                                     (gpointer) insert_text_handler, data);
+
+	g_signal_stop_emission_by_name (editable, "insert_text");
+
+	g_free (result);
+}
+
+void entry1_changed_cb(GtkEditable *editable, gpointer user_data)
+{
+
+}
+
 void show_icon(gint input, App *app)
 {
 	gchar *image_1 = g_build_path(G_DIR_SEPARATOR_S, "./icons", "ikona-ok-48x48.png", NULL);
@@ -188,6 +215,9 @@ static void activate(GApplication *application, App *app) {
 	UI_ELEMENT(GtkImage, image1);
 	UI_ELEMENT(GtkLabel, label2);
 	UI_ELEMENT(GtkLinkButton, linkbutton1);
+	UI_ELEMENT(GtkEditable, entry1);
+
+	gtk_editable_set_editable(entry1, TRUE);
 
 	gtk_button_set_label(button1, _("Weryfikuj"));
 	gtk_button_set_label(button2, _("Wyczyść"));
