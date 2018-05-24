@@ -1,0 +1,54 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# This file is distributed under the same license as the gnu-hello-world package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: gnu-hello-world 0.7\n"
+"Report-Msgid-Bugs-To: 48721262935pl@gmail.com\n"
+"POT-Creation-Date: 2018-05-23 21:07+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/main.c:28
+msgid "Hello! How are you?"
+msgstr ""
+
+#: src/main.c:29 data/gnu_hello_world.appdata.xml.in:4
+msgid "GNU Hello World Example"
+msgstr ""
+
+#: data/gnu_hello_world.appdata.xml.in:5
+msgid "An Example Application"
+msgstr ""
+
+#: data/gnu_hello_world.appdata.xml.in:6
+msgid "MajsterKlepka"
+msgstr ""
+
+#: data/gnu_hello_world.appdata.xml.in:8
+msgid ""
+"An example in C using the GTK + library. A simple GUI application that "
+"literally does nothing. Prepared exclusively for the preparation of the rpm "
+"package for the distribution of Fedora Linux Workstation 28. Translation for "
+"Polish and native language is English. No support for GTK + themes."
+msgstr ""
+
+#: data/gnu_hello_world.appdata.xml.in:11
+msgid ""
+"The example is the most non-educational one, showing some possibilities of "
+"the rpm package builder system and the gettext translation preparation "
+"system. It contains an icon file in the standard scalable vector graphics "
+"file svg."
+msgstr ""
+
+#: data/gnu_hello_world.appdata.xml.in:21
+msgid "Screenshot"
+msgstr ""

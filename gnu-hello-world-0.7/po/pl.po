@@ -1,0 +1,64 @@
+# Polish translations for gnu-hello-world package.
+# Copyright (C) 2018 Free Software Foundation, Inc.
+# This file is distributed under the same license as the gnu-hello-world package.
+# MajsterKlepka <majsterklepka@majsterklepka-desktop>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnu-hello-world 0.5\n"
+"Report-Msgid-Bugs-To: 48721262935pl@gmail.com\n"
+"POT-Creation-Date: 2018-05-23 21:07+0200\n"
+"PO-Revision-Date: 2018-05-23 21:08+0200\n"
+"Last-Translator: Paweł Sobótka <starywandal@onet.pl>\n"
+"Language-Team: Polish\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 2.0.7\n"
+
+#: src/main.c:28
+msgid "Hello! How are you?"
+msgstr "Cześć! Jak się masz?"
+
+#: src/main.c:29 data/gnu_hello_world.appdata.xml.in:4
+msgid "GNU Hello World Example"
+msgstr "GNU witaj świecie"
+
+#: data/gnu_hello_world.appdata.xml.in:5
+msgid "An Example Application"
+msgstr "Przykładowa aplikacja"
+
+#: data/gnu_hello_world.appdata.xml.in:6
+msgid "MajsterKlepka"
+msgstr "MajsterKlepka"
+
+#: data/gnu_hello_world.appdata.xml.in:8
+msgid ""
+"An example in C using the GTK + library. A simple GUI application that "
+"literally does nothing. Prepared exclusively for the preparation of the rpm "
+"package for the distribution of Fedora Linux Workstation 28. Translation for "
+"Polish and native language is English. No support for GTK + themes."
+msgstr ""
+"Przykład w języku C z wykorzystaniem biblioteki GTK+. Prosta aplikacja z "
+"GUI, która dosłownie nic nie robi. Przygotowana wyłącznie na potrzeby "
+"przygotowania pakietu rpm dla dystrybucji Fedora Linux Workstation 28. "
+"Tłumaczenie dla języka polskiego a natywny język to angielski. Brak wsparcia "
+"dla schematu tematów GTK+."
+
+#: data/gnu_hello_world.appdata.xml.in:11
+msgid ""
+"The example is the most non-educational one, showing some possibilities of "
+"the rpm package builder system and the gettext translation preparation "
+"system. It contains an icon file in the standard scalable vector graphics "
+"file svg."
+msgstr ""
+"Przykład jak najbardziej nieedukacyjny, pokazujące pewne możliwości systemu "
+"budowania pakietów rpm i systemu przygotowania tłumaczeń gettext. Zawiera "
+"plik ikony w standardcie skalowalnych wektorowych plików graficznych svg."
+
+#: data/gnu_hello_world.appdata.xml.in:21
+msgid "Screenshot"
+msgstr "Zrzut ekranu"

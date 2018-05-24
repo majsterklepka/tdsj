@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=GNU Hello World Example
+Name[pl]=GNU witaj świecie
+Comment=An Example Application
+Comment[pl]=Przykładowy program
+Icon=hello
+Exec=hello
+Type=Application
