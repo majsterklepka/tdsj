@@ -1,0 +1,5 @@
+2018-05-18  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): New variable.
+	* configure.ac (AC_CONFIG_FILES): Add po/Makefile.in.
+

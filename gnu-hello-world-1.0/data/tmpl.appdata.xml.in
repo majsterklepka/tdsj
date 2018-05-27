@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>org.majsterklepka.hello.desktop</id>
+  <_name>GNU Hello World Example</_name>
+  <_summary>An Example Application</_summary>
+  <developer_name>MajsterKlepka</developer_name>
+  <description>
+  <_p>
+   An example in C using the GTK + library. A simple GUI application that literally does nothing. Prepared exclusively for the preparation of the rpm package for the distribution of Fedora Linux Workstation 28. Translation for Polish and native language is English. No support for GTK + themes.
+  </_p>
+  <_p>
+   The example is the most non-educational one, showing some possibilities of the rpm package builder system and the gettext translation preparation system. It contains an icon file in the standard scalable vector graphics file svg.
+  </_p>
+  </description>
+  <metadata_license>CC-BY-SA-3.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <url type="homepage">http://majsterklepka.github.io/</url>
+  <project_group></project_group>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Screenshot</caption>
+         <image height="630" width="1120">https://raw.githubusercontent.com/majsterklepka/majsterklepka.github.io/master/images/b.png</image>
+    </screenshot>
+  </screenshots>
+  <update_contact>starywandal@onet.pl</update_contact>
+<translation type="gettext">gnu-hello-world</translation>
+</component>

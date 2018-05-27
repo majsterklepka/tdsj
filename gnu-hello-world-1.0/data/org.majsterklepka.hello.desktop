@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name[pl]=GNU witaj świecie
+Name[en]=GNU Hello World Example
+Name=GNU Hello World Example
+Comment[pl]=Przykładowa aplikacja
+Comment[en]=An Example Applicattion
+Comment=An Example Applicattion
+Icon[pl]=org.majsterklepka.hello
+Icon[en]=org.majsterklepka.hello
+Icon=org.majsterklepka.hello
+Exec=hello
+Type=Application
+
