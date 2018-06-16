@@ -27,37 +27,21 @@ int main(void)
 		return EXIT_FAILURE;
 	}
 
-	printf("Teraz aplikacja sprawdzi czy w bazie danych jest  tabela \"majsterklepka\"...\n");
+	printf("Teraz aplikacja sprawdzi,\nczy w bazie danych jest  tabela \"majsterklepka\"...");
 
 	/*jedna z możliwości sprawdzenia czy w bazie danych istnieje tabela*/
-	sql_query= "SELECT * FROM majsterklepka;";
+	sql_query= "CREATE TABLE IF NOT EXISTS majsterklepka (ROWID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name CHAR(50), address CHAR(100), zip CHAR(10), phone CHAR(14));";
 
-	rc = sqlite3_exec(db, sql_query, NULL, 0, &errMsg);
+	rc = sqlite3_exec(db, sql_query, NULL, 0, NULL);
 
 	/*jeśli nie będzie żadnego błędu..
 	 * to oznacza, że tabela istnieje!
 	 * gdy wystąpi błąd...
 	 * to oznacza, że tabeli nie ma w bazie danych
 	 */
-	if (errMsg == NULL){
-		fprintf(stdout, "Tabela istnieje!\n\n");
-	}else{
-		printf("Tabela \"majsterklepka\" nie istnieje!\n");
-		printf("Tworzenie tabeli \"majsterklepka\"...\n");
-
-		/*komenda języka sql
-		 *tworzenia tabeli w bazie danych
-		 */
-		sql_query = "CREATE TABLE majsterklepka(ROWID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name 	CHAR(50), address CHAR(100), zip CHAR(10), phone CHAR(14));";
-
-		/*zapytanie sql*/
-		rc = sqlite3_exec(db, sql_query, NULL, 0, NULL);
-
-		if (rc == SQLITE_OK){
-		printf("Utworzono tabelę \"majsterklepka\"...\n\n");
-		}
+	if (rc == SQLITE_OK ){
+		fprintf(stdout, "OK!\n");
 	}
-	printf("Sprawdzanie tabeli \"majsterklepka\"...\n");
 
 	/*polecenie języka sql umożliwiające
 	 *sprawdzenie tabeli
@@ -65,6 +49,13 @@ int main(void)
 	 */
 	sql_query= "PRAGMA table_info(majsterklepka);";
 	rc = sqlite3_exec(db, sql_query, readdata, 0, &errMsg);
+	printf("Sprawdzanie poprawności tabeli \"majsterklepka\"...");
+	if (rc == SQLITE_OK )
+	{
+		printf("OK!\n");
+	}else{
+		printf("Błąd!\nError code: %s\n", errMsg);
+	}
 
 
 	sqlite3_close(db);
