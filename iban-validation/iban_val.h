@@ -12,7 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <math.h>
+#include <gmp.h>
+#include <assert.h>
 
 
 #ifndef IBAN_VAL_H_
