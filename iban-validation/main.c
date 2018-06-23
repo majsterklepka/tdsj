@@ -2,10 +2,11 @@
  * main.c
  *
  *  Created on: 29 mar 2018
- *      Author: majsterklepka
+ *      Author: Paweł Sobótka
  */
 
 #include "iban_val.h"
+#define V(cc, exp) if (!strncmp(iban, cc, 2)) return len == exp
 
 void app_init(App *app)
 {
@@ -38,70 +39,6 @@ GObject *get_ui_element(App *app, const gchar *name)
 	return NULL;
 }
 
-
-int iban_validation(const char *iban)
-{
-	char number[64];
-	int len, i, k;
-	long int sum;;
-
-	char prefix[5];
-	char suffix[25];
-	char output[64];
-
-	number[0] = '\0';
-	prefix[0] = '\0';
-	suffix[0] = '\0';
-	output[0] = '\0';
-
-	len = 0;
-	i = 0;
-	k = 0;
-
-	for ( i = 0; i < strlen(iban); i++)
-	{
-		if(!isspace(*(iban+ i)))
-		{
-			number[k] = *(iban + i);
-			k++;
-		}
-	}
-
-	number[k] = '\0';
-
-	len = strlen(number);
-	if ( len != 28 ){
-		return 0;
-	}
-
-	for(i = 0; i < 2; i++){
-		if (!isalpha(number[i]))
-				return -1;
-	}
-	for ( i = 2; i < len; i++){
-		if(!isdigit(number[i]))
-			return -1;
-	}
-
-	strncpy(prefix, number, 4);
-	prefix[4] = '\0';
-	strncpy(suffix, number+4, 24);
-	suffix[24] = '\0';
-
-	strcat(output,suffix);
-	strcat(output, prefix);
-	char *p;
-	div_t result;
-	result = div(strtol(output, &p, 10),97);
-	sum = abs(result.rem);
-	if ( sum == 1)
-		return 1;
-	else
-		return 0;
-
-}
-
-
 void
 insert_text_handler (GtkEditable *editable,
                      const gchar *text,
@@ -122,6 +59,114 @@ insert_text_handler (GtkEditable *editable,
 
 	g_free (result);
 }
+
+void string_space(const char *input, char *output)
+{
+    int i,j;
+    j = 0;
+    if ( output == 0 ){
+		fprintf(stderr, "virtual memory exceeded!\n");
+		return;
+	}
+
+    for	(i = 0; i < strlen(output); i++)
+    {
+		output[i] = '\0';
+    }
+    for (i = 0; i<strlen(input); i++)
+    {
+        if (!isspace(input[i])){
+          output[j]=input[i];
+          j++;
+	}
+    }
+    output[j]='\0';
+}
+
+int valid_cc(const char *iban, int len)
+{
+    V("AL", 28); V("AD", 24); V("AT", 20); V("AZ", 28); V("BE", 16); V("BH", 22); V("BA", 20); V("BR", 29);
+    V("BG", 22); V("CR", 21); V("HR", 21); V("CY", 28); V("CZ", 24); V("DK", 18); V("DO", 28); V("EE", 20);
+    V("FO", 18); V("FI", 18); V("FR", 27); V("GE", 22); V("DE", 22); V("GI", 23); V("GR", 27); V("GL", 18);
+    V("GT", 28); V("HU", 28); V("IS", 26); V("IE", 22); V("IL", 23); V("IT", 27); V("KZ", 20); V("KW", 30);
+    V("LV", 21); V("LB", 28); V("LI", 21); V("LT", 20); V("LU", 20); V("MK", 19); V("MT", 31); V("MR", 27);
+    V("MU", 30); V("MC", 27); V("MD", 24); V("ME", 22); V("NL", 18); V("NO", 15); V("PK", 24); V("PS", 29);
+    V("PL", 28); V("PT", 25); V("RO", 24); V("SM", 27); V("SA", 24); V("RS", 22); V("SK", 24); V("SI", 19);
+    V("ES", 24); V("SE", 24); V("CH", 21); V("TN", 24); V("TR", 26); V("AE", 23); V("GB", 22); V("VG", 24);
+
+    return 0;
+}
+
+
+int iban_validation(const char *iban)
+{
+	int i, j, l, sz;
+	unsigned long int resp;
+	mpz_t n;//biginteger
+	mpz_t o;//biginteger
+	int flag;
+	l = 0;
+
+	sz = strlen(iban);
+
+	for (i = 0; i < sz; i++) {
+		if (!isdigit(iban[i]) && !isupper(iban[i]))
+			return 0;
+		l += isupper(iban[i]);
+	}
+
+	if (!valid_cc(iban, sz))
+		return 0;
+
+    char *number = (char*)malloc(sz*sizeof(char));
+	if ( number == 0 ){
+		fprintf(stderr, "virtual memory exceeded!\n");
+		return -1;
+	}
+    strcpy(number, iban + 4);
+    strncpy(number + sz - 4, iban, 4);
+
+    char *trans = (char*)malloc((sz + l)*sizeof(char));
+	if ( trans == 0 ){
+		fprintf(stderr, "virtual memory exceeded!\n");
+		return -1;
+	}
+    trans[sz + l + 1] = 0;
+
+	for (i = j = 0; i <strlen(number); ++i, ++j) {
+		if (isdigit(number[i]))
+			trans[j] = number[i];
+		else {
+			trans[j]   = (number[i] - 55) / 10 + '0';
+			trans[++j] = (number[i] - 55) % 10 + '0';
+		}
+	}
+	trans[j] = '\0';
+
+	mpz_init(n);
+	mpz_set_ui(n, 0);
+	mpz_init(o);
+	mpz_set_ui(o, 0);
+	free(number);
+
+	flag = mpz_set_str(n, trans, 10);
+  	assert(flag == 0);
+
+   	mpz_mod_ui(o,n, 97UL);// sum modulus
+
+	resp = mpz_get_ui(o);//integer output
+
+	mpz_clear(n);
+	mpz_clear(o);
+	free(trans);
+
+	if (resp == 1){
+		return 1;
+	}
+
+    return 0;
+}
+
 
 void entry1_changed_cb(GtkEditable *editable, gpointer user_data)
 {
@@ -151,42 +196,41 @@ void show_text(int input, App *app)
 {
 	UI_ELEMENT(GtkLabel, label1);
 	const gchar *text1 = _("To nie jest numer IBAN");
-	const gchar *text2 = _("podany ciąg znaków zawiera błędy");
-	const gchar *text3 = _("To jest poprawny numer IBAN");
-	const gchar *text4 = _("Wprowadź numer IBAN w pole powyżej\npamiętaj aby było to 28 znaków\nz dwuliterowym kodem kraju przed ciągiem cyfr\nmożesz wprowadzić IBAN rozdzielony spacjami na grupy...");
+	const gchar *text2 = _("To jest poprawny numer IBAN");
+	const gchar *text3 = _("Wprowadź numer IBAN w pole powyżej\npamiętaj aby było to 28 znaków\nz dwuliterowym kodem kraju przed ciągiem cyfr\nmożesz wprowadzić IBAN rozdzielony spacjami na grupy...");
+	const gchar *text4 = _("program wygenerował błąd");
 	switch(input){
 		case 0:
 			gtk_label_set_text(label1, text1);
 			break;
 		case 1:
-			gtk_label_set_text(label1, text3);
-			break;
-		case -1:
 			gtk_label_set_text(label1, text2);
 			break;
-		default:
+		case 2:
 			gtk_label_set_text(label1, text4);
+			break;
+		default:
+			gtk_label_set_text(label1, text3);
 	}
 }
 
 void button1_clicked_cb(GtkWidget * widget, App *app)
 {
 	UI_ELEMENT(GtkEntry, entry1);
-	const gchar *text = gtk_entry_get_text(entry1);
+	gchar *text = (char*)malloc(40*sizeof(char));
+	string_space(gtk_entry_get_text(entry1), text);
 	int response = iban_validation(text);
-	if (response == 0){
-		show_text(response, app);
-		show_icon(2, app);
-	}else if (response == -1){
-		show_text(response, app);
-		show_icon(2, app);
-	}else if (response == 1){
+	if (response == 1){
 		show_text(response, app);
 		show_icon(1, app);
-	}else{
-		show_text(0, app);
+	}else if (response == 0){
+		show_text(response, app);
+		show_icon(2, app);
+	}else {
+		show_text(2, app);
 		show_icon(2, app);
 	}
+	g_free(text);
 
 }
 
@@ -196,7 +240,7 @@ void button2_clicked_cb(GtkWidget * widget, App *app)
 {
 	UI_ELEMENT(GtkEntry, entry1);
 	gtk_entry_set_text(entry1, " ");
-	show_text(2,app);
+	show_text(3,app);
 	show_icon(0, app);
 
 }
@@ -227,7 +271,7 @@ static void activate(GApplication *application, App *app) {
 	gtk_button_set_label(GTK_BUTTON(linkbutton1), "MajsterKlepka GitHub Pages");
 	gtk_link_button_set_uri(linkbutton1, "https://majsterklepka.github.io");
 
-	show_text(2,app);
+	show_text(3,app);
 
 	gtk_widget_hide(GTK_WIDGET(image1));
 
