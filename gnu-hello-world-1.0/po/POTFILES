@@ -1,0 +1,3 @@
+     ../src/main.c \
+     ../data/tmpl.appdata.xml.in \
+     ../data/org.majsterklepka.hello.desktop.in

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnu-hello-world 1.0\n"
 "Report-Msgid-Bugs-To: 48721262935pl@gmail.com\n"
-"POT-Creation-Date: 2018-05-26 19:14+0200\n"
+"POT-Creation-Date: 2018-11-04 13:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,12 +21,13 @@ msgstr ""
 msgid "Hello! How are you?"
 msgstr ""
 
-#: src/main.c:29 data/org.majsterklepka.hello.desktop.in:3
+#: src/main.c:29 data/tmpl.appdata.xml.in:4
+#: data/org.majsterklepka.hello.desktop.in:3
 msgid "GNU Hello World Example"
 msgstr ""
 
-#: data/tmpl.appdata.xml.in:6
-msgid "MajsterKlepka"
+#: data/tmpl.appdata.xml.in:5
+msgid "An Example Application"
 msgstr ""
 
 #: data/tmpl.appdata.xml.in:8
