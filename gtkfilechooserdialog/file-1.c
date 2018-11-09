@@ -18,6 +18,7 @@ Description:	GtkFileChooserDialog example written in C
 
 GtkWidget *window;
 GtkWidget *textview;
+gchar *namefile;
 
 static void set_title(const gchar *filename)
 {
@@ -59,7 +60,8 @@ if (res == GTK_RESPONSE_ACCEPT)
     GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
     filename = gtk_file_chooser_get_filename (chooser);
     open_file (filename);
-	set_title(filename);
+    set_title(filename);
+    namefile = filename;
     g_free (filename);
   }
 
@@ -75,7 +77,8 @@ int main(int argc, char **argv)
 
     gtk_init(&argc, &argv);
   
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    namefile = NULL;
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), 640, 480);
 
     button = gtk_button_new_with_label("Otwórz Plik");
