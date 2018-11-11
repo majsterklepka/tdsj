@@ -18,17 +18,22 @@ Description:	GtkFileChooserDialog example written in C
 
 GtkWidget *window;
 GtkWidget *textview;
+GtkWidget *button2;
 gboolean user_edited_current_document;
-gchar *existing_filename;
+gboolean document_is_saved;
+gchar *filename;
+GtkTextBuffer *textbuffer;
 
 static void text_buffer_changed(GtkTextBuffer *buffer, gpointer user_data)
 {
 	user_edited_current_document = TRUE;
+	gchar *name = g_strdup_printf("%s: *%s", g_get_application_name(), g_filename_display_basename(filename));
+	gtk_window_set_title(GTK_WINDOW(window), name);
+	gtk_widget_set_state_flags(button2, GTK_STATE_FLAG_ACTIVE, TRUE);
 }
 
-static void save_to_file(const gchar *filename)
+static void save_to_file()
 {
-	GtkTextBuffer *textbuffer;
 	GtkTextIter start, end;
 	textbuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
 	gtk_text_buffer_get_start_iter(textbuffer, &start);
@@ -38,148 +43,158 @@ static void save_to_file(const gchar *filename)
 }
 
 
-static void open_file(const gchar *filename)
+static void open_file()
 {
-	GtkTextBuffer *textbuffer;
 	textbuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
-    gchar *contents = NULL;
+	gchar *contents = NULL;
 	g_file_get_contents(filename, &contents, NULL, NULL);
 	gtk_text_buffer_set_text(textbuffer, contents, -1);
 	gtk_text_buffer_set_modified(textbuffer, FALSE);
 	user_edited_current_document = FALSE;
-	g_signal_connect(textbuffer, "modified-changed", G_CALLBACK(text_buffer_changed), NULL);
+	g_signal_connect(textbuffer, "modified-changed", G_CALLBACK(text_buffer_changed), filename);
 	g_free(contents);
 }
 
 
 
-static void set_title(const gchar *filename)
+static void set_title()
 {
 	gchar *name = g_strdup_printf("%s: %s", g_get_application_name(), g_filename_display_basename(filename));
 	gtk_window_set_title(GTK_WINDOW(window), name); 
 }
 
+static void save_file(GtkButton *button, gpointer user_data)
+{
+	save_to_file(filename);
+	set_title(filename);
+}
+
+
+
 static void save_as(GtkButton *button, gpointer user_data)
 {
-GtkWidget *dialog;
-GtkFileChooser *chooser;
-GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
-gint res;
+	GtkWidget *dialog;
+	GtkFileChooser *chooser;
+	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
+	gint res;
 
-dialog = gtk_file_chooser_dialog_new ("Zapisz plik...",
-                                      GTK_WINDOW(window),
-                                      action,
-                                      "_Porzuć",
-                                      GTK_RESPONSE_CANCEL,
-                                      "_Zapisz",
-                                      GTK_RESPONSE_ACCEPT,
-                                      NULL);
-chooser = GTK_FILE_CHOOSER (dialog);
+	dialog = gtk_file_chooser_dialog_new ("Zapisz plik...",
+						GTK_WINDOW(window),
+	  					action,
+	  					"_Porzuć",
+	  					GTK_RESPONSE_CANCEL,
+	  					"_Zapisz",
+	  					GTK_RESPONSE_ACCEPT,
+	  					NULL);
+	chooser = GTK_FILE_CHOOSER (dialog);
 
-gtk_file_chooser_set_do_overwrite_confirmation (chooser, TRUE);
+	gtk_file_chooser_set_do_overwrite_confirmation (chooser, TRUE);
 
-if (user_edited_current_document)
-  gtk_file_chooser_set_current_name (chooser,
-                                     "Dokument bez tytułu");
-else
-  gtk_file_chooser_set_filename (chooser,
-                                 existing_filename);
+	if (user_edited_current_document)
+		gtk_file_chooser_set_current_name (chooser,
+				"Dokument bez tytułu");
+	else
+		gtk_file_chooser_set_filename (chooser,
+				 filename);
 
-res = gtk_dialog_run (GTK_DIALOG (dialog));
-if (res == GTK_RESPONSE_ACCEPT)
-  {
-    char *filename;
+	res = gtk_dialog_run (GTK_DIALOG (dialog));
+	if (res == GTK_RESPONSE_ACCEPT)
+	{
+		filename = gtk_file_chooser_get_filename (chooser);
+		save_to_file ();
+		set_title();
+		gtk_widget_set_state_flags(button2, GTK_STATE_FLAG_INSENSITIVE, TRUE);
+	  }
 
-    filename = gtk_file_chooser_get_filename (chooser);
-	save_to_file (filename);
-	set_title(filename);
-	g_free (filename);
-  }
-
-gtk_widget_destroy (dialog);
+	gtk_widget_destroy (dialog);
 }
 
 static void file_open(GtkButton *button, gpointer user_data)
 { 
-GtkWidget *dialog;
-GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
-gint res;
+	GtkWidget *dialog;
+	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+	gint res;
 
-dialog = gtk_file_chooser_dialog_new ("Otwórz plik",
-                                      GTK_WINDOW(window),
-                                      action,
-                                      "_Porzuć",
-                                      GTK_RESPONSE_CANCEL,
-                                      "_Otwórz",
-                                      GTK_RESPONSE_ACCEPT,
-                                      NULL);
+	dialog = gtk_file_chooser_dialog_new ("Otwórz plik",
+						GTK_WINDOW(window),
+						action,
+						"_Porzuć",
+						GTK_RESPONSE_CANCEL,
+						"_Otwórz",
+						GTK_RESPONSE_ACCEPT,
+						NULL);
 
-res = gtk_dialog_run (GTK_DIALOG (dialog));
-if (res == GTK_RESPONSE_ACCEPT)
-  {
-    char *filename;
-    GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
-    filename = gtk_file_chooser_get_filename (chooser);
-    open_file (filename);
-	existing_filename = filename;
-	set_title(filename);
-    g_free (filename);
-  }
+	res = gtk_dialog_run (GTK_DIALOG (dialog));
+	if (res == GTK_RESPONSE_ACCEPT)
+	{
+		GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
+		filename = gtk_file_chooser_get_filename (chooser);
+		open_file();
+		set_title();
+	}
 
-gtk_widget_destroy (dialog);
+	gtk_widget_destroy (dialog);
 }
 
 
 
 int main(int argc, char **argv)
 {
-    GtkWidget *button;
-    GtkWidget *button1;
-    GtkWidget *box;
-    GtkWidget *scrolled;
-    GtkWidget *buttonbox;
+	GtkWidget *button;
+	GtkWidget *button1;
+	GtkWidget *box;
+	GtkWidget *scrolled;
+	GtkWidget *buttonbox;
 
-    gtk_init(&argc, &argv);
-	
-    existing_filename = "Dokument bez tytułu";
-    user_edited_current_document = FALSE;
+	gtk_init(&argc, &argv);
+		
+	user_edited_current_document = FALSE;
 
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_default_size(GTK_WINDOW(window), 640, 480);
-    gtk_window_set_default_icon_name("gedit");
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_default_size(GTK_WINDOW(window), 640, 480);
+	gtk_window_set_default_icon_name("gedit");
 
-    button = gtk_button_new_with_label("Otwórz Plik");
-    button1 = gtk_button_new_with_label("Zapisz jako...");
+	button = gtk_button_new_with_label("Otwórz Plik");
+	button1 = gtk_button_new_with_label("Zapisz jako...");
+	button2 = gtk_button_new_with_label("Zapisz");
 
-    g_signal_connect(button, "clicked", G_CALLBACK(file_open), NULL);
-    g_signal_connect(button1, "clicked", G_CALLBACK(save_as), NULL);
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(button, "clicked", G_CALLBACK(file_open), NULL);
+	g_signal_connect(button1, "clicked", G_CALLBACK(save_as), NULL);
+	g_signal_connect(button2, "clicked", G_CALLBACK(save_file), NULL);
+	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-    box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    buttonbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+	gtk_widget_set_state_flags(button2, GTK_STATE_FLAG_INSENSITIVE, TRUE);
 
-    gtk_button_box_set_layout(GTK_BUTTON_BOX(buttonbox), GTK_BUTTONBOX_START);		
+	box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	buttonbox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
 
-    gtk_box_pack_start(GTK_BOX(buttonbox), button, FALSE, FALSE, 2);
+	gtk_button_box_set_layout(GTK_BUTTON_BOX(buttonbox), GTK_BUTTONBOX_START);		
+
+	gtk_box_pack_start(GTK_BOX(buttonbox), button, FALSE, FALSE, 2);
+	gtk_box_pack_end(GTK_BOX(buttonbox), button2, FALSE, FALSE, 2);
 	gtk_box_pack_end(GTK_BOX(buttonbox), button1, FALSE, FALSE, 2);
-    gtk_box_pack_start(GTK_BOX(box), buttonbox, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(box), buttonbox, FALSE, FALSE, 2);
 
 	textview = gtk_text_view_new();
-	
+	textbuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
+	g_signal_connect(textbuffer, "modified-changed", G_CALLBACK(text_buffer_changed), filename);	
+
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(textview), TRUE);
 
-    scrolled = gtk_scrolled_window_new(NULL, NULL);
+	scrolled = gtk_scrolled_window_new(NULL, NULL);
 
-    gtk_container_add(GTK_CONTAINER(scrolled), textview);		
-    gtk_box_pack_end(GTK_BOX(box), scrolled, 1, 1, 2);
-    gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(box));
+	gtk_container_add(GTK_CONTAINER(scrolled), textview);		
+	gtk_box_pack_end(GTK_BOX(box), scrolled, 1, 1, 2);
+	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(box));
 
 	g_set_application_name("GtkFileChooserDialog Example");
 
-    gtk_widget_show_all(window);
+	gtk_widget_show_all(window);
 
-    gtk_main();
-    
-    return 0;
+	gtk_main();
+
+	g_free(filename);
+
+	return 0;
 }
 
