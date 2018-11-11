@@ -91,7 +91,8 @@ if (res == GTK_RESPONSE_ACCEPT)
     char *filename;
 
     filename = gtk_file_chooser_get_filename (chooser);
-    save_to_file (filename);
+	save_to_file (filename);
+	set_title(filename);
 	g_free (filename);
   }
 
@@ -133,21 +134,22 @@ gtk_widget_destroy (dialog);
 int main(int argc, char **argv)
 {
     GtkWidget *button;
-	GtkWidget *button1;
+    GtkWidget *button1;
     GtkWidget *box;
     GtkWidget *scrolled;
     GtkWidget *buttonbox;
 
     gtk_init(&argc, &argv);
 	
-	existing_filename = NULL;
-	user_edited_current_document = FALSE;
-	  
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    existing_filename = "Dokument bez tytułu";
+    user_edited_current_document = FALSE;
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), 640, 480);
+    gtk_window_set_default_icon_name("gedit");
 
     button = gtk_button_new_with_label("Otwórz Plik");
-	button1 = gtk_button_new_with_label("Zapisz jako...");
+    button1 = gtk_button_new_with_label("Zapisz jako...");
 
     g_signal_connect(button, "clicked", G_CALLBACK(file_open), NULL);
     g_signal_connect(button1, "clicked", G_CALLBACK(save_as), NULL);
