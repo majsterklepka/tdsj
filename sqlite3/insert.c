@@ -94,8 +94,8 @@ int insert_data()
 				sqlite3_close(db);
 		        return -1;
 			}
-           sqlite3_reset(res);
-		   sqlite3_clear_bindings(res);
+		sqlite3_reset(res);
+		sqlite3_clear_bindings(res);
 	}
 	sqlite3_finalize(res);
 		
