@@ -8,12 +8,13 @@
 int init_database();
 int insert_data();
 int read_data();
+int update_data(char *name, int id);
 
 sqlite3 *db;
 
 int main(void) {
     
-    int rc = sqlite3_open("test7.db", &db);
+    int rc = sqlite3_open(":memory:", &db);
     
     if (rc != SQLITE_OK) {
         
@@ -42,6 +43,14 @@ int main(void) {
 	}
     
     response = read_data();
+    if (response != RESPONSE_OK)
+    {
+		printf("Nie udało się odczytać rekordów z bazy danych.\n");
+	}
+	char *name = "Piotr";
+	int id = 2;
+	response = update_data(name, id);
+	response = read_data();
     if (response != RESPONSE_OK)
     {
 		printf("Nie udało się odczytać rekordów z bazy danych.\n");
@@ -88,7 +97,7 @@ int insert_data()
     for ( i = 0; i < 3; i++){
 			rc = sqlite3_bind_text(res, 1, names[i], strlen(names[i]), NULL);
 			if (rc != SQLITE_OK)
-				return 1;
+				return -1;
 			if (sqlite3_step(res) != SQLITE_DONE) {
 				sqlite3_finalize(res);
 				sqlite3_close(db);
@@ -122,5 +131,36 @@ int read_data()
     printf("Ostatni klucz z wprowadzonych rekordów %d\n", last_id);
 //-----------------------------------------------------------   
 	
+	return 0;
+}
+
+int update_data(char * name, int id)
+{
+	sqlite3_stmt *res = NULL;
+	char *sql = "UPDATE Friends SET Name = ?1 WHERE Id = ?2";
+	int rc = sqlite3_prepare_v2(db, sql, strlen(sql), &res, 0);
+	if (rc != SQLITE_OK){
+		printf("Nie udało się skompilować zapytania...\n");
+		return -1;
+	} else {
+	rc = sqlite3_bind_int(res, 2, id);	
+	rc = sqlite3_bind_text(res, 1, name, strlen(name), NULL);
+	}
+	if (rc != SQLITE_OK){
+		printf("Nie udało się przygotować rekordu!\n");
+		return -1;
+	}
+	if (sqlite3_step(res) != SQLITE_DONE) {
+		printf("nie dodano rekordu!\n");
+		sqlite3_finalize(res);
+		sqlite3_close(db);
+		return -1;
+	}
+	printf("Rekord dodany!\n");
+
+	sqlite3_reset(res);
+	sqlite3_clear_bindings(res);
+	sqlite3_finalize(res);
+
 	return 0;
 }
