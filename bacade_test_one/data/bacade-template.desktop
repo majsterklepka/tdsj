@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Bank Cash Deposit
+Comment=A simple office application
+Exec=gres
+Icon=majsterklepka-bacade
+Terminal=false
+Categories=Office
+
