@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/majsterklepka/bacade">
-   <file compressed="true">window_main.ui</file>
-   <file>data/splashscreen.png</file>
-   <file>data/bacade22.png</file>
-   <file>data/bacade24.png</file>
-   <file>data/bacade32.png</file>
-   <file>data/bacade48.png</file>
-   <file>data/bacade128.png</file>
-   <file>data/bacade256.png</file>
+	<file compressed="true" preprocess="xml-stripblanks">window_main.ui</file>
+	<file compressed="true" preprocess="xml-stripblanks">dialog_input.ui</file>
+	<file>data/splashscreen.png</file>
+	<file>data/bacade22.png</file>
+	<file>data/bacade24.png</file>
+	<file>data/bacade32.png</file>
+	<file>data/bacade48.png</file>
+	<file>data/bacade128.png</file>
+	<file>data/bacade256.png</file>
  </gresource>
 </gresources>
