@@ -19,7 +19,7 @@ gboolean close_screen(gpointer data)
 }
 
 
-int Show_Splash_Screen(int tme)
+int Show_Splash_Screen(GApplication *app, int tme)
 {
   GtkWidget  *image, *window;
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -27,11 +27,9 @@ int Show_Splash_Screen(int tme)
   gtk_window_set_decorated(GTK_WINDOW (window), FALSE);
   gtk_window_set_position(GTK_WINDOW(window),GTK_WIN_POS_CENTER_ALWAYS);
   gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
-  gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
   gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
-  GApplication *app = g_application_get_default();
   const gchar *basepath = g_application_get_resource_base_path(app);
-  gchar *path = g_build_path("/", basepath, "data/splashscreen.png", NULL);
+  gchar *path = g_build_path("/", basepath, "img", "splashscreen.png", NULL);
   image = gtk_image_new_from_resource(path);
   gtk_container_add(GTK_CONTAINER(window), image);
   gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
@@ -44,21 +42,31 @@ int Show_Splash_Screen(int tme)
 
 void Set_Icons()
 {
-	gint dim[] = {256, 128, 48, 32, 24, 22, 0};
+	gint dim[] = {1024, 512, 256, 128, 96, 72, 64, 48, 32, 24, 22, 0};
 	GList *list = NULL;
 	gint i = 0;
 	GError *error = NULL;
 	GApplication *app = g_application_get_default();
 	const gchar *basepath = g_application_get_resource_base_path(app);
-	
+	gchar *path = g_build_path("/", basepath, "img", NULL);
 		while(dim[i] != 0 )
 		{
-		gchar * path = g_strdup_printf("%s/data/bacade%d.png", basepath, dim[i]);
-		GdkPixbuf *icon = gdk_pixbuf_new_from_resource(path, &error);
-		list = g_list_append(list, icon);
-		i++;		
+			gchar *name = g_strdup_printf("icons%dx%d.png", dim[i], dim[i]);
+			gchar *resource = g_build_path("/", path, name,  NULL);
+			GdkPixbuf *icon = gdk_pixbuf_new_from_resource(resource, &error);
+			if(error){
+				g_print("error at %s!\n", error->message);
+				g_error_free(error);
+			}else{
+				list = g_list_append(list, icon);
+				i++;
+			}
+		g_free(resource);
+		g_free(name);
 		}
+
 		gtk_window_set_default_icon_list(list);
+
 		g_list_foreach(list, (GFunc) g_object_unref, NULL);
 		g_list_free(list);
 }
@@ -96,10 +104,11 @@ void show_dialog(GtkButton *button, gpointer user_data)
 	GtkWidget *dialog;
 	GApplication *app = g_application_get_default();
 	const gchar *basepath = g_application_get_resource_base_path(app);
-	gchar *path = g_build_path("/", basepath, "dialog_input.ui", NULL);
+	gchar *path = g_build_path("/", basepath, "Gtk", "dialog_input.ui", NULL);
 	gtk_builder_add_from_resource(builder, path, &error);
 	gtk_builder_connect_signals(builder, NULL);
 	dialog = (GtkWidget*)gtk_builder_get_object(builder, "dialog_input");
+	gtk_window_set_title(GTK_WINDOW(dialog), "Dane");
 	g_signal_connect(dialog, "response", G_CALLBACK(response_user), user_data);
 	gtk_dialog_run(GTK_DIALOG(dialog));
 	gtk_widget_destroy(GTK_WIDGET(dialog));
@@ -147,7 +156,6 @@ void activate(GApplication *app, gpointer user_data){
 
 	liststore = gtk_list_store_new (2,G_TYPE_STRING, G_TYPE_STRING);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(view), GTK_TREE_MODEL(liststore));
-	Set_Icons();
 
 	g_signal_connect(window, "destroy", G_CALLBACK(close_window), app);
 	g_signal_connect(button3, "clicked", G_CALLBACK(show_dialog), view);
@@ -165,13 +173,15 @@ void startup(GApplication *app, gpointer user_data){
 
 	builder = gtk_builder_new();
 	const gchar *basepath = g_application_get_resource_base_path(app);
-	gchar *path = g_build_path("/", basepath, "window_main.ui", NULL);
+	gchar *path = g_build_path("/", basepath, "Gtk", "window_main.ui", NULL);
 
 	gtk_builder_add_from_resource(builder, path, &error);
 
 	gtk_builder_connect_signals(builder, app);
 
-	Show_Splash_Screen(3000);
+	Set_Icons();
+
+	Show_Splash_Screen(app, 3000);
 }
 
 
@@ -187,7 +197,11 @@ int main(int argc, char **argv)
 {
 
 	GtkApplication *app;
+	GError *error;
 	gint status = 0;
+	GCancellable *cancellable;
+
+	cancellable = g_cancellable_new();
 	//GAppInfo *info;
 	//GError *error = NULL;
 	
@@ -212,7 +226,7 @@ int main(int argc, char **argv)
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
 
 	status = g_application_run(G_APPLICATION(app), argc, argv);
-	g_application_register(G_APPLICATION(app), NULL, NULL);
+	g_application_register(G_APPLICATION(app), cancellable, &error);
 	
 	clear_app();
 	}else
