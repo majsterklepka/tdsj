@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/org/majsterklepka/bacade">
 	<file compressed="true" preprocess="xml-stripblanks">Gtk/window_main.ui</file>
+		<file compressed="true" preprocess="xml-stripblanks">Gtk/dialog1.ui</file>
 	<file compressed="true" preprocess="xml-stripblanks">Gtk/dialog_input.ui</file>
 	<file>img/splashscreen.png</file>
 	<file>img/icons22x22.png</file>
