@@ -182,6 +182,7 @@
                           <item id="2" translatable="yes">USD</item>
                           <item id="3" translatable="yes">GBP</item>
                           <item id="4" translatable="yes">CHF</item>
+                          <item id="5" translatable="yes">EUR</item>
                         </items>
                       </object>
                       <packing>
