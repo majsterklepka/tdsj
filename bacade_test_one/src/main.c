@@ -65,6 +65,8 @@ void Set_Icons()
 		g_free(name);
 		}
 
+		gtk_window_set_default_icon_name("bacade-office");
+
 		gtk_window_set_default_icon_list(list);
 
 		g_list_foreach(list, (GFunc) g_object_unref, NULL);
@@ -80,9 +82,11 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 	GtkEntry *dialog1_entry5;
 	GtkEntry *dialog1_entry6;
 	GtkSwitch *dialog1_switch1;
+	GtkComboBoxText *dialog1_comboboxtext1;
 	GtkTreeIter iter;
 	const gchar *text_entry1 = NULL, *text_entry2 = NULL, *text_entry3 = NULL, *text_entry4 = NULL, *text_entry5 = NULL, *text_entry6 = NULL, *text_switch1 = NULL;
 	gboolean dialog1_switch1_state = FALSE;
+	const gchar *text_comboboxtext1 = NULL;
 
 	dialog1_entry1 = (GtkEntry*)gtk_entry_new();
 	dialog1_entry2 = (GtkEntry*)gtk_entry_new();
@@ -91,6 +95,8 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 	dialog1_entry5 = (GtkEntry*)gtk_entry_new();
 	dialog1_entry6 = (GtkEntry*)gtk_entry_new();
 	dialog1_switch1 = (GtkSwitch*)gtk_switch_new();
+	dialog1_comboboxtext1 = (GtkComboBoxText*)gtk_combo_box_text_new();
+	dialog1_comboboxtext1 = (GtkComboBoxText*)gtk_builder_get_object(builder, "dialog1_comboboxtext1");
 	dialog1_entry1 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry1");
 	dialog1_entry2 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry2");
 	dialog1_entry3 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry3");
@@ -107,6 +113,7 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 				text_entry5 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry5));
 				text_entry6 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry6));
 				dialog1_switch1_state = gtk_switch_get_state(dialog1_switch1);
+				text_comboboxtext1 = gtk_combo_box_text_get_active_text(dialog1_comboboxtext1);
 
 				if (dialog1_switch1_state){
 					text_switch1 = "PRZELEW";
@@ -121,10 +128,11 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 									  0, text_entry1,
 									  1, text_entry2,
 									  2, text_entry3,
-									  3, text_switch1,
-									  4, text_entry4,
-									  5, text_entry5,
-									  6, text_entry6,
+									  3, text_comboboxtext1,
+									  4, text_switch1,
+									  5, text_entry4,
+									  6, text_entry5,
+									  7, text_entry6,
 									  -1);
 				break;
 		default:
@@ -201,7 +209,7 @@ void activate(GApplication *app, gpointer user_data){
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 	                                               -1,
-	                                               "Typ operacji",
+	                                               "Waluta",
 	                                               renderer,
 	                                               "text", 3,
 	                                               NULL);
@@ -209,7 +217,7 @@ void activate(GApplication *app, gpointer user_data){
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 	                                               -1,
-	                                               "IBAN Nadawcy",
+	                                               "Typ operacji",
 	                                               renderer,
 	                                               "text", 4,
 	                                               NULL);
@@ -217,9 +225,17 @@ void activate(GApplication *app, gpointer user_data){
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 	                                               -1,
-	                                               "Adres Nadawcy",
+	                                               "IBAN Nadawcy",
 	                                               renderer,
 	                                               "text", 5,
+	                                               NULL);
+
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
+	                                               -1,
+	                                               "Adres Nadawcy",
+	                                               renderer,
+	                                               "text", 6,
 	                                               NULL);
 
 	renderer = gtk_cell_renderer_text_new ();
@@ -227,13 +243,13 @@ void activate(GApplication *app, gpointer user_data){
 		                                               -1,
 		                                               "Tytuł operacji",
 		                                               renderer,
-		                                               "text", 6,
+		                                               "text", 7,
 		                                               NULL);
 
 
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), TRUE);
 
-	liststore = gtk_list_store_new (7,G_TYPE_STRING, G_TYPE_STRING,G_TYPE_STRING, G_TYPE_STRING,G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	liststore = gtk_list_store_new (8,G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(view), GTK_TREE_MODEL(liststore));
 
 	g_signal_connect(window, "destroy", G_CALLBACK(close_window), app);
