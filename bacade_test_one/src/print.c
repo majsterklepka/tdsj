@@ -78,7 +78,7 @@ check_transfer_payment(cairo_t *cr, double x_margin, double y_margin,
 
 void
 draw_form_description(cairo_t *cr, PangoLayout *layout, double x_margin,
-		double y_margin, gint opt)
+		double y_margin, gchar *waluta)
 {
 		PangoFontDescription *desc;
 
@@ -99,23 +99,8 @@ draw_form_description(cairo_t *cr, PangoLayout *layout, double x_margin,
 			pango_layout_set_text(layout, g_utf8_substring(wp, i, i + 1), -1);
 			pango_cairo_show_layout(cr, layout);
 		}
-		gchar *monetary = '\0';
-
-		switch(opt){
-			case 2:
-				monetary = nl_langinfo(__INT_CURR_SYMBOL);
-				break;
-			case 1:
-				monetary = "USD";
-				break;
-			case 0:
-				monetary = "EUR";
-				break;
-			default:
-				monetary = nl_langinfo(__INT_CURR_SYMBOL);
-				break;	
-		}
 		
+				
 		// -------------------------------------------------
 
 		cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
@@ -126,7 +111,7 @@ draw_form_description(cairo_t *cr, PangoLayout *layout, double x_margin,
 		for (i = 0; i < 3; i++) {
 			cairo_move_to(cr, x_margin + start + (10 + i) * step,
 					y_margin + 24.5 + pole_height + 3.3);
-			pango_layout_set_text(layout, g_utf8_substring(monetary, i, i + 1), -1);
+			pango_layout_set_text(layout, g_utf8_substring(waluta, i, i + 1), -1);
 			pango_cairo_show_layout(cr, layout);
 		}
 
@@ -484,34 +469,17 @@ draw_amount(cairo_t *cr, PangoLayout *layout, double x_margin,
 }
 
 void
-draw_form(GtkPrintOperation *operation, GtkPrintContext *context,
-		int page_nr, PrintData *print_data)
+draw_form(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, FormData *form_data)
 {
-		cairo_t *cr;
-		PangoLayout *layout;
-
+			
 		gint i, l, start_1;
-		start_1 = start;
-
-		cr = gtk_print_context_get_cairo_context(context);
-		layout = print_data->layout;
-
-		double page_width = gtk_print_context_get_width(context);
-		double page_height = gtk_print_context_get_height(context);
+				
 		double cr_width = 140.00;
 		double cr_height = 200.00;
-		double x_margin = (page_width - cr_width) / 2.00;
-		double y_margin = (page_height - cr_height) / 2.00;
-		if (x_margin < 0){
-			cr_width = page_width - 0.6;
-			x_margin = 0;
-		}
-		if (y_margin < 0){
-				cr_height = page_height - 0.6;
-				y_margin = 0;
-		}
+				
 		x_margin += 0.3;
 		y_margin += 0.3;
+		
 		for (l = 0; l < 2; l++) {
 
 			y_margin += l * (cr_height / 2.00);
@@ -698,16 +666,15 @@ draw_form(GtkPrintOperation *operation, GtkPrintContext *context,
 			cairo_rectangle(cr, x_margin + start + 20 * step, y_margin + 78.00,
 					20.00, 20.00);
 			cairo_stroke(cr);
-
-			draw_description_one(cr, layout, x_margin, y_margin, print_data->text_01);
-			draw_iban(cr, layout, x_margin,y_margin + 17.5, print_data->text_02);
-			draw_amount(cr, layout, x_margin + 14 * step, y_margin + 27.50, print_data->text_03);
-			draw_iban(cr, layout, x_margin, y_margin + 36.00, print_data->text_04);
-			draw_description_two(cr, layout, x_margin, y_margin + 44.00, print_data->text_05);
-			draw_description_two(cr, layout, x_margin, y_margin + 58.00, print_data->text_06);
-			draw_form_description(cr, layout, x_margin, y_margin, print_data->opt);
-			check_transfer_payment(cr, x_margin, y_margin, print_data->check);
-			start = start_1;
+			
+			draw_description_one(cr, layout, x_margin, y_margin, form_data->addres1);
+			draw_iban(cr, layout, x_margin,y_margin + 17.5, form_data->iban1);
+			draw_amount(cr, layout, x_margin + 14 * step, y_margin + 27.50, form_data->kwota);
+			draw_iban(cr, layout, x_margin, y_margin + 36.00, form_data->iban2);
+			draw_description_two(cr, layout, x_margin, y_margin + 44.00, form_data->addres2);
+			draw_description_two(cr, layout, x_margin, y_margin + 58.00, form_data->tytul);
+			draw_form_description(cr, layout, x_margin, y_margin, form_data->waluta);
+			check_transfer_payment(cr, x_margin, y_margin, form_data->trans);
 		}
 
 }

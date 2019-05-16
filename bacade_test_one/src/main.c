@@ -6,10 +6,195 @@
 #include <locale.h>
 #include "../bacade-gresource.h"
 #include "print.h"
+#include <malloc.h>
 
 GtkBuilder *builder;
 GtkListStore *liststore;
 GResource *resource;
+GList *active_prints = NULL;
+GtkPrintSettings *settings;
+GtkPageSetup *page_setup;
+
+gboolean iterate_func(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, PrintData *print_data)
+{
+	FormData *form; 
+
+	form = g_new0(FormData, 1);
+
+    
+    gchar *addres1, *iban1, *kwota, *addres2, *iban2, *tytul, *waluta, *trans;
+    
+    gtk_tree_model_get(GTK_TREE_MODEL(liststore), iter, 0, &addres1, 1, &iban1, 2, &kwota, 3, &waluta, 4, &trans, 5, &iban2, 6, &addres2, 7, &tytul, -1);
+
+
+	form->addres1 = g_strdup(addres1);
+	form->iban1 = g_strdup(iban1);
+	form->kwota = g_strdup(kwota);
+	form->iban2 = g_strdup(iban2);
+	form->addres2 = g_strdup(addres2);
+	form->waluta = g_strdup(waluta);
+	form->tytul = g_strdup(tytul);
+	const gchar *template = "WPLATA";
+	if (g_strcmp0(trans, template) == 0)
+		form->trans = FALSE;
+	else
+		form->trans = TRUE;
+		
+	print_data->data = g_list_append(print_data->data, form);
+	print_data->data_length += 1;
+	
+	g_free(addres1);
+	g_free(addres2);
+	g_free(iban1);
+	g_free(iban2);
+	g_free(kwota);
+	g_free(waluta);
+	g_free(trans);
+
+	return FALSE;
+}
+
+void begin_print (GtkPrintOperation *operation, GtkPrintContext *context, PrintData *user_data)
+{
+	gtk_tree_model_foreach(GTK_TREE_MODEL(liststore), (GtkTreeModelForeachFunc)iterate_func, user_data);	
+	gtk_print_operation_set_n_pages(operation, user_data->data_length);
+	
+}
+
+static void draw_page (GtkPrintOperation *operation, GtkPrintContext *context, gint page_nr, PrintData *user_data)
+{
+	
+	PangoLayout *layout;
+	cairo_t *cr;
+	double x_margin, y_margin; 
+
+    
+    double width, height;   
+    
+    width = gtk_print_context_get_width(context);
+	height = gtk_print_context_get_height(context);
+
+	layout = gtk_print_context_create_pango_layout(context);
+
+	pango_layout_set_width(layout, width * PANGO_SCALE);
+	pango_layout_set_height(layout, height * PANGO_SCALE);
+	
+	cr = gtk_print_context_get_cairo_context (context);
+	
+	x_margin = 10.0;
+	y_margin = 20.0;
+	FormData *form_data; 
+	
+	form_data = g_new0(FormData, 1);
+	form_data = (FormData*)g_list_nth_data(user_data->data, page_nr);
+	if(form_data == NULL)
+		g_print("error\n");
+			
+	draw_form(cr, layout, x_margin, y_margin, form_data);
+	
+}
+
+
+void end_print (GtkPrintOperation *operation, GtkPrintContext *context, PrintData *user_data)
+{	
+}
+
+
+static void print_done(GtkPrintOperation *op, GtkPrintOperationResult res,
+		PrintData *print_data) {
+	GError *error = NULL;
+	
+	GtkWidget *window1 = (GtkWidget*)gtk_builder_get_object(builder, "window1");
+	
+	if (res == GTK_PRINT_OPERATION_RESULT_ERROR) {
+
+		GtkWidget *error_dialog;
+
+		gtk_print_operation_get_error(op, &error);
+
+		error_dialog = gtk_message_dialog_new(GTK_WINDOW(window1),
+				GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR,
+				GTK_BUTTONS_CLOSE, _("Error printing file:\n%s"),
+				error ? error->message : "no details");
+		g_signal_connect(error_dialog, "response",
+				G_CALLBACK (gtk_widget_destroy), NULL);
+		gtk_widget_show(error_dialog);
+	} else if (res == GTK_PRINT_OPERATION_RESULT_APPLY) {
+		if (settings != NULL)
+			g_object_unref(settings);
+		settings = g_object_ref(gtk_print_operation_get_print_settings(op));
+	}
+	g_free(print_data);
+
+	if (!gtk_print_operation_is_finished(op)) {
+		g_object_ref(op);
+		active_prints = g_list_append(active_prints, op);
+
+	}
+}
+
+static void do_print (void)
+{
+	GtkPrintOperation *print;
+	PrintData *data;
+	GError *error = NULL;
+	GtkWidget *error_dialog;
+	data = g_new0(PrintData, 1);
+	
+	settings = gtk_print_settings_new();
+	page_setup = gtk_page_setup_new();
+	
+	
+	GtkWidget *window1 = (GtkWidget*)gtk_builder_get_object(builder, "window1");
+
+	gint res;
+
+	print = gtk_print_operation_new();
+	gtk_print_operation_set_embed_page_setup(print, TRUE);
+	gtk_print_operation_set_track_print_status(print, TRUE);
+	gtk_print_operation_set_unit(print, GTK_UNIT_MM);
+
+	if (settings != NULL)
+  		gtk_print_operation_set_print_settings (print, settings);
+  
+	if (page_setup != NULL)
+  		gtk_print_operation_set_default_page_setup (print, page_setup);
+  
+	g_signal_connect (print, "begin-print", 
+                  G_CALLBACK (begin_print), data);
+	g_signal_connect (print, "draw-page", 
+                  G_CALLBACK (draw_page), data);
+	g_signal_connect(print, "end-print", G_CALLBACK (end_print), data);
+	g_signal_connect(print, "done", G_CALLBACK (print_done), data);
+
+ 
+	res = gtk_print_operation_run (print, 
+                               GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG, 
+                               GTK_WINDOW(window1), 
+                               &error);
+ 
+	if (res == GTK_PRINT_OPERATION_RESULT_ERROR)
+ 	{
+   		error_dialog = gtk_message_dialog_new (GTK_WINDOW (window1),
+                                 GTK_DIALOG_DESTROY_WITH_PARENT,
+                         GTK_MESSAGE_ERROR,
+                         GTK_BUTTONS_CLOSE,
+                         "Error printing file:\n%s",
+                         error->message);
+   		g_signal_connect (error_dialog, "response", 
+                     G_CALLBACK (gtk_widget_destroy), NULL);
+   		gtk_widget_show (error_dialog);
+   		g_error_free (error);
+ 	}
+	else if (res == GTK_PRINT_OPERATION_RESULT_APPLY)
+ 	{
+   		if (settings != NULL)
+		g_object_unref (settings);
+   		settings = g_object_ref(gtk_print_operation_get_print_settings (print));
+ }
+	g_object_unref(print);
+
+}
 
 gboolean close_screen(gpointer data)
 {
@@ -120,10 +305,10 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 					text_entry4 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry4));
 				}
 				else{
-					text_switch1 = "WPŁATA";
-					text_entry4 = '\0';
+					text_switch1 = "WPLATA";
+					text_entry4 = "- - -";
 				}
-
+				
 				gtk_list_store_set (liststore, &iter,
 									  0, text_entry1,
 									  1, text_entry2,
@@ -134,10 +319,12 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 									  6, text_entry5,
 									  7, text_entry6,
 									  -1);
+				
 				break;
 		default:
 				break;
 	}
+	
 	gtk_tree_view_set_model(GTK_TREE_VIEW(user_data), GTK_TREE_MODEL(liststore));
 	gtk_widget_hide(GTK_WIDGET(dialog));
 
@@ -172,6 +359,7 @@ void activate(GApplication *app, gpointer user_data){
 	GtkWidget *view;
 	GtkCellRenderer *renderer;
 	GtkWidget *button3;
+	GtkWidget *button4;
 
 	window = (GtkWindow *) gtk_application_window_new(GTK_APPLICATION(app));
 	window = (GtkWindow *) gtk_builder_get_object(builder, "window1");
@@ -179,6 +367,8 @@ void activate(GApplication *app, gpointer user_data){
 	view = (GtkWidget *) gtk_builder_get_object(builder, "treeview");
 	button3 = gtk_button_new();
 	button3 = (GtkWidget *) gtk_builder_get_object(builder, "button3");
+	button4 = gtk_button_new();
+	button4 = (GtkWidget *) gtk_builder_get_object(builder, "button4");
 	title = g_strdup_printf("%s %s", g_get_application_name(), "1.50.1");
 	gtk_window_set_title(GTK_WINDOW(window), title);
 
@@ -254,6 +444,7 @@ void activate(GApplication *app, gpointer user_data){
 
 	g_signal_connect(window, "destroy", G_CALLBACK(close_window), app);
 	g_signal_connect(button3, "clicked", G_CALLBACK(show_dialog), view);
+	g_signal_connect(button4, "clicked", G_CALLBACK(do_print), NULL);
 	gtk_widget_show_all(GTK_WIDGET(window));
 }
 

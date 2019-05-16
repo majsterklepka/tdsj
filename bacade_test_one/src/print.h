@@ -32,20 +32,24 @@
 
 
 typedef struct {
-	gchar *text_01;
-	gchar *text_02;
-	gchar *text_03;
-	gchar *text_04;
-	gchar *text_05;
-	gchar *text_06;
-	gboolean check;
-	gint opt;
-	PangoLayout *layout;
+	GList *data;
+	gint data_length;
 } PrintData;
+
+typedef struct {
+	gchar *addres1;
+	gchar *iban1;
+	gchar *kwota;
+	gchar *iban2;
+	gchar *addres2;
+	gchar *tytul;
+	gchar *waluta;
+	gboolean trans;	
+} FormData;
 
 void check_transfer_payment(cairo_t *cr, double x_margin, double y_margin, gboolean check);
 
-void draw_form_description(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, gint opt);
+void draw_form_description(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, gchar *waluta);
 
 void draw_description_one(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, gchar *text);
 
@@ -55,7 +59,7 @@ void draw_iban(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margi
 
 void draw_amount(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, gchar *text);
 
-void draw_form(GtkPrintOperation *operation, GtkPrintContext *context, int page_nr, PrintData *print_data);
+void draw_form(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, FormData *form_data);
 
 
 
