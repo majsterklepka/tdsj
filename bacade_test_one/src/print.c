@@ -136,6 +136,7 @@ draw_form_description(cairo_t *cr, PangoLayout *layout, double x_margin,
 		gchar *right_side_1 = _("part for the obligor");
 		gchar *footer = _("12. stamp, date and signature of the principal");
 		gchar *oplata = _("13. commission");
+		gchar *copyrightsholder = "Bank Cash Deposit\nv1.50.1 GNU GPLv3\n©2017-2019 Paweł Sobótka";
 
 		pango_layout_set_width(layout, ((g_utf8_strlen(pole_01, -1)) * 1.2) * PANGO_SCALE);
 		cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
@@ -237,6 +238,13 @@ draw_form_description(cairo_t *cr, PangoLayout *layout, double x_margin,
 		pango_layout_set_width(layout, ((g_utf8_strlen(oplata, -1)) * 1.2) * PANGO_SCALE);
 		pango_layout_set_text(layout, oplata, ((g_utf8_strlen(oplata, -1)) * 1.2) * PANGO_SCALE);
 		pango_cairo_show_layout(cr, layout);
+		
+		cairo_move_to(cr, x_margin + start + 64.50, y_margin + 78.50);
+		pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
+		pango_layout_set_width(layout, 34 * PANGO_SCALE);
+		pango_layout_set_text(layout, copyrightsholder, ((g_utf8_strlen(copyrightsholder, -1)) * 1.2) * PANGO_SCALE);
+		pango_cairo_show_layout(cr, layout);
+		
 		cairo_move_to(cr, x_margin + start + 70.00, y_margin + 95.00);
 		cairo_line_to(cr, x_margin + start + 0.8 + 70.00 + 15.00, y_margin + 95.00);
 		cairo_stroke(cr);

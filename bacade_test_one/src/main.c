@@ -62,23 +62,53 @@ void begin_print (GtkPrintOperation *operation, GtkPrintContext *context, PrintD
 	GtkTreeView *view = (GtkTreeView*)gtk_builder_get_object(builder, "treeview1");
 	GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(view)));
 	
-	gtk_tree_model_foreach(GTK_TREE_MODEL(liststore), (GtkTreeModelForeachFunc)iterate_func, user_data);	
-	gtk_print_operation_set_n_pages(operation, user_data->data_length);
-	
+	gtk_tree_model_foreach(GTK_TREE_MODEL(liststore), (GtkTreeModelForeachFunc)iterate_func, user_data);
+	if (user_data->data_length > 0)	
+		gtk_print_operation_set_n_pages(operation, user_data->data_length);
+	else{
+		GtkWidget *window = (GtkWidget*)gtk_builder_get_object(builder, "window1");
+		GtkWidget *error_dialog;
+
+		error_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+				GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR,
+				GTK_BUTTONS_CLOSE, _("Printing Error!\nNo content add to print queue!"));
+		g_signal_connect(error_dialog, "response",
+				G_CALLBACK (gtk_widget_destroy), NULL);
+		gtk_widget_show(error_dialog);
+		
+	}
+		
+		
 }
 
 static void draw_page (GtkPrintOperation *operation, GtkPrintContext *context, gint page_nr, PrintData *user_data)
 {
+	g_return_if_fail(user_data->data_length > 0 );
 	
 	PangoLayout *layout;
 	cairo_t *cr;
 	double x_margin, y_margin; 
 
+    double width, height;
     
-    double width, height;   
+    double cr_width = 140.00;
+    double cr_height = 200.00;   
     
     width = gtk_print_context_get_width(context);
 	height = gtk_print_context_get_height(context);
+	
+	x_margin = (width - cr_width) / 2.00;
+	y_margin = (height - cr_height) / 2.00;
+	if (x_margin < 0){
+		cr_width = width - 0.6;
+		x_margin = 0;
+	}
+	if (y_margin < 0){
+			cr_height = height - 0.6;
+			y_margin = 0;
+		}
+	x_margin += 0.3;
+	
 
 	layout = gtk_print_context_create_pango_layout(context);
 
@@ -87,8 +117,6 @@ static void draw_page (GtkPrintOperation *operation, GtkPrintContext *context, g
 	
 	cr = gtk_print_context_get_cairo_context (context);
 	
-	x_margin = 10.0;
-	y_margin = 20.0;
 	FormData *form_data; 
 	
 	form_data = g_new0(FormData, 1);
@@ -317,7 +345,7 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 					text_entry4 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry4));
 				}
 				else{
-					text_switch1 = " - ";
+					text_switch1 = "- - -";
 					text_entry4 = "- - -";
 				}
 				
@@ -503,7 +531,7 @@ void clear_app()
 	if (liststore != NULL)	
 		gtk_list_store_clear(liststore);
 	if(active_prints != NULL)
-		g_free(active_prints);				
+		g_list_free1(active_prints);				
 	g_object_unref(builder);
 }
 
