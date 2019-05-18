@@ -9,18 +9,20 @@
 #include <malloc.h>
 
 GtkBuilder *builder;
-GtkListStore *liststore;
 GResource *resource;
-GList *active_prints = NULL;
+GList *active_prints;
 GtkPrintSettings *settings;
-GtkPageSetup *page_setup;
+
 
 gboolean iterate_func(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, PrintData *print_data)
 {
 	FormData *form; 
 
 	form = g_new0(FormData, 1);
-
+	
+	GtkTreeView *view = (GtkTreeView*)gtk_builder_get_object(builder, "treeview1");
+	GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(view)));
+	
     
     gchar *addres1, *iban1, *kwota, *addres2, *iban2, *tytul, *waluta, *trans;
     
@@ -34,7 +36,7 @@ gboolean iterate_func(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
 	form->addres2 = g_strdup(addres2);
 	form->waluta = g_strdup(waluta);
 	form->tytul = g_strdup(tytul);
-	const gchar *template = "WPLATA";
+	const gchar *template = " - ";
 	if (g_strcmp0(trans, template) == 0)
 		form->trans = FALSE;
 	else
@@ -56,6 +58,10 @@ gboolean iterate_func(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
 
 void begin_print (GtkPrintOperation *operation, GtkPrintContext *context, PrintData *user_data)
 {
+	
+	GtkTreeView *view = (GtkTreeView*)gtk_builder_get_object(builder, "treeview1");
+	GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(view)));
+	
 	gtk_tree_model_foreach(GTK_TREE_MODEL(liststore), (GtkTreeModelForeachFunc)iterate_func, user_data);	
 	gtk_print_operation_set_n_pages(operation, user_data->data_length);
 	
@@ -87,6 +93,7 @@ static void draw_page (GtkPrintOperation *operation, GtkPrintContext *context, g
 	
 	form_data = g_new0(FormData, 1);
 	form_data = (FormData*)g_list_nth_data(user_data->data, page_nr);
+	
 	if(form_data == NULL)
 		g_print("error\n");
 			
@@ -101,8 +108,10 @@ void end_print (GtkPrintOperation *operation, GtkPrintContext *context, PrintDat
 
 
 static void print_done(GtkPrintOperation *op, GtkPrintOperationResult res,
-		PrintData *print_data) {
-	GError *error = NULL;
+		PrintData *print_data) 
+{
+	
+	GError *error = NULL;	
 	
 	GtkWidget *window1 = (GtkWidget*)gtk_builder_get_object(builder, "window1");
 	
@@ -120,20 +129,21 @@ static void print_done(GtkPrintOperation *op, GtkPrintOperationResult res,
 				G_CALLBACK (gtk_widget_destroy), NULL);
 		gtk_widget_show(error_dialog);
 	} else if (res == GTK_PRINT_OPERATION_RESULT_APPLY) {
-		if (settings != NULL)
-			g_object_unref(settings);
-		settings = g_object_ref(gtk_print_operation_get_print_settings(op));
+		if (settings != NULL){
+			g_object_unref (settings);
+			settings = g_object_ref(gtk_print_operation_get_print_settings(op));
+		}
 	}
 	g_free(print_data);
 
 	if (!gtk_print_operation_is_finished(op)) {
 		g_object_ref(op);
 		active_prints = g_list_append(active_prints, op);
-
 	}
+	
 }
 
-static void do_print (void)
+ void do_print(void)
 {
 	GtkPrintOperation *print;
 	PrintData *data;
@@ -142,14 +152,17 @@ static void do_print (void)
 	data = g_new0(PrintData, 1);
 	
 	settings = gtk_print_settings_new();
-	page_setup = gtk_page_setup_new();
+	GtkPageSetup *page_setup = gtk_page_setup_new();
 	
 	
 	GtkWidget *window1 = (GtkWidget*)gtk_builder_get_object(builder, "window1");
 
 	gint res;
 
+	gchar *job_name = g_strdup_printf("%s: wydruk %d", g_get_application_name(), (g_list_length(active_prints) + 1));
+
 	print = gtk_print_operation_new();
+	gtk_print_operation_set_job_name (print, job_name);
 	gtk_print_operation_set_embed_page_setup(print, TRUE);
 	gtk_print_operation_set_track_print_status(print, TRUE);
 	gtk_print_operation_set_unit(print, GTK_UNIT_MM);
@@ -188,11 +201,12 @@ static void do_print (void)
  	}
 	else if (res == GTK_PRINT_OPERATION_RESULT_APPLY)
  	{
-   		if (settings != NULL)
-		g_object_unref (settings);
-   		settings = g_object_ref(gtk_print_operation_get_print_settings (print));
+   		if (settings != NULL){
+			g_object_unref (settings);
+			settings = g_object_ref(gtk_print_operation_get_print_settings (print));
+		}
  }
-	g_object_unref(print);
+	
 
 }
 
@@ -269,18 +283,15 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 	GtkSwitch *dialog1_switch1;
 	GtkComboBoxText *dialog1_comboboxtext1;
 	GtkTreeIter iter;
+	
+	GtkTreeView *view = (GtkTreeView*)gtk_builder_get_object(builder, "treeview1");
+	GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(view)));
+	
+	
 	const gchar *text_entry1 = NULL, *text_entry2 = NULL, *text_entry3 = NULL, *text_entry4 = NULL, *text_entry5 = NULL, *text_entry6 = NULL, *text_switch1 = NULL;
 	gboolean dialog1_switch1_state = FALSE;
 	const gchar *text_comboboxtext1 = NULL;
 
-	dialog1_entry1 = (GtkEntry*)gtk_entry_new();
-	dialog1_entry2 = (GtkEntry*)gtk_entry_new();
-	dialog1_entry3 = (GtkEntry*)gtk_entry_new();
-	dialog1_entry4 = (GtkEntry*)gtk_entry_new();
-	dialog1_entry5 = (GtkEntry*)gtk_entry_new();
-	dialog1_entry6 = (GtkEntry*)gtk_entry_new();
-	dialog1_switch1 = (GtkSwitch*)gtk_switch_new();
-	dialog1_comboboxtext1 = (GtkComboBoxText*)gtk_combo_box_text_new();
 	dialog1_comboboxtext1 = (GtkComboBoxText*)gtk_builder_get_object(builder, "dialog1_comboboxtext1");
 	dialog1_entry1 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry1");
 	dialog1_entry2 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry2");
@@ -289,6 +300,7 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 	dialog1_entry5 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry5");
 	dialog1_entry6 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry6");
 	dialog1_switch1 = (GtkSwitch*)gtk_builder_get_object(builder, "dialog1_switch1");
+	
 	switch(resp_id){
 		case GTK_RESPONSE_OK:
 				gtk_list_store_append(liststore, &iter);
@@ -301,11 +313,11 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 				text_comboboxtext1 = gtk_combo_box_text_get_active_text(dialog1_comboboxtext1);
 
 				if (dialog1_switch1_state){
-					text_switch1 = "PRZELEW";
+					text_switch1 = "OK";
 					text_entry4 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry4));
 				}
 				else{
-					text_switch1 = "WPLATA";
+					text_switch1 = " - ";
 					text_entry4 = "- - -";
 				}
 				
@@ -325,13 +337,13 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 				break;
 	}
 	
-	gtk_tree_view_set_model(GTK_TREE_VIEW(user_data), GTK_TREE_MODEL(liststore));
+	gtk_tree_view_set_model(GTK_TREE_VIEW(view), GTK_TREE_MODEL(liststore));
 	gtk_widget_hide(GTK_WIDGET(dialog));
 
 
 }
 
-void show_dialog(GtkButton *button, gpointer user_data)
+void show_dialog(GtkWidget *item, gpointer user_data)
 {
 	GError *error = NULL;
 	GtkWidget *dialog;
@@ -358,19 +370,29 @@ void activate(GApplication *app, gpointer user_data){
 	gchar *title;
 	GtkWidget *view;
 	GtkCellRenderer *renderer;
-	GtkWidget *button3;
-	GtkWidget *button4;
-
+	GtkToolbar *toolbar;
+	GtkToolItem *toolitem;
+	GtkWidget *icon;
+	GtkLinkButton *linkbutton;
+	
+	
 	window = (GtkWindow *) gtk_application_window_new(GTK_APPLICATION(app));
 	window = (GtkWindow *) gtk_builder_get_object(builder, "window1");
-	view = gtk_tree_view_new();
-	view = (GtkWidget *) gtk_builder_get_object(builder, "treeview");
-	button3 = gtk_button_new();
-	button3 = (GtkWidget *) gtk_builder_get_object(builder, "button3");
-	button4 = gtk_button_new();
-	button4 = (GtkWidget *) gtk_builder_get_object(builder, "button4");
+	view = (GtkWidget *) gtk_builder_get_object(builder, "treeview1");
+	toolbar = (GtkToolbar*) gtk_builder_get_object(builder, "toolbar1");
 	title = g_strdup_printf("%s %s", g_get_application_name(), "1.50.1");
+	
+	icon = gtk_image_new_from_icon_name("gtk-add",GTK_ICON_SIZE_LARGE_TOOLBAR);
+	toolitem = gtk_tool_button_new(icon, "Dodaj");
+	gtk_toolbar_insert(toolbar, toolitem, 0);
+	g_signal_connect(toolitem, "clicked", G_CALLBACK(show_dialog), app);
+	
+	linkbutton = (GtkLinkButton*) gtk_builder_get_object(builder, "linkbutton1");
+	gtk_button_set_label(GTK_BUTTON(linkbutton), "MajsterKlepka GitHub Page(s)");
+	
 	gtk_window_set_title(GTK_WINDOW(window), title);
+
+	GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(view)));
 
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
@@ -407,7 +429,7 @@ void activate(GApplication *app, gpointer user_data){
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 	                                               -1,
-	                                               "Typ operacji",
+	                                               "Przelew",
 	                                               renderer,
 	                                               "text", 4,
 	                                               NULL);
@@ -429,7 +451,7 @@ void activate(GApplication *app, gpointer user_data){
 	                                               NULL);
 
 	renderer = gtk_cell_renderer_text_new ();
-		gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view),
 		                                               -1,
 		                                               "Tytuł operacji",
 		                                               renderer,
@@ -439,12 +461,10 @@ void activate(GApplication *app, gpointer user_data){
 
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), TRUE);
 
-	liststore = gtk_list_store_new (8,G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	
 	gtk_tree_view_set_model(GTK_TREE_VIEW(view), GTK_TREE_MODEL(liststore));
 
 	g_signal_connect(window, "destroy", G_CALLBACK(close_window), app);
-	g_signal_connect(button3, "clicked", G_CALLBACK(show_dialog), view);
-	g_signal_connect(button4, "clicked", G_CALLBACK(do_print), NULL);
 	gtk_widget_show_all(GTK_WIDGET(window));
 }
 
@@ -460,6 +480,8 @@ void startup(GApplication *app, gpointer user_data){
 	builder = gtk_builder_new();
 	const gchar *basepath = g_application_get_resource_base_path(app);
 	gchar *path = g_build_path("/", basepath, "Gtk", "window_main.ui", NULL);
+	
+	active_prints = NULL;
 
 	gtk_builder_add_from_resource(builder, path, &error);
 
@@ -475,7 +497,13 @@ void clear_app()
 {
 	g_resources_unregister(resource);
 	g_resource_unref(resource);
-	gtk_list_store_clear(liststore);
+	
+	GtkTreeView *view = (GtkTreeView*)gtk_builder_get_object(builder, "treeview1");
+	GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(view)));
+	if (liststore != NULL)	
+		gtk_list_store_clear(liststore);
+	if(active_prints != NULL)
+		g_free(active_prints);				
 	g_object_unref(builder);
 }
 
