@@ -1,6 +1,7 @@
 CC=gcc
 glib-compile-resources=glib-compile-resources
 CFLAGS=$(shell pkg-config --cflags gtk+-3.0)
+CFLAGS+=-rdynamic
 LIBS=$(shell pkg-config --libs gtk+-3.0)
 
 all: bacade-gresource.c bacade-gresource.h
@@ -20,6 +21,6 @@ bacade.gresource:
 clean:
 	rm -f bacade
 	rm -f bacade-gresource.c
-	rm -f bacade-gresource.h./bacade
+	rm -f bacade-gresource.h
 	rm -f bacade.gresource
 
