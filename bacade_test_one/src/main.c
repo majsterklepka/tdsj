@@ -171,7 +171,7 @@ static void print_done(GtkPrintOperation *op, GtkPrintOperationResult res,
 	
 }
 
- void do_print(void)
+ void do_print(GtkWidget *widget, gpointer user_data)
 {
 	GtkPrintOperation *print;
 	PrintData *data;
@@ -300,7 +300,93 @@ void Set_Icons()
 		g_list_free(list);
 }
 
-void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
+
+
+void dialog1_response2(GtkDialog *dialog, gint resp_id, gpointer user_data)
+{
+	GtkEntry *dialog1_entry1;
+	GtkEntry *dialog1_entry2;
+	GtkEntry *dialog1_entry3;
+	GtkEntry *dialog1_entry4;
+	GtkEntry *dialog1_entry5;
+	GtkEntry *dialog1_entry6;
+	GtkSwitch *dialog1_switch1;
+	GtkComboBoxText *dialog1_comboboxtext1;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	
+	
+	GtkTreeView *view = (GtkTreeView*)gtk_builder_get_object(builder, "treeview1");
+	GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(view)));
+
+	const gchar *text_entry1 = NULL, *text_entry2 = NULL, *text_entry3 = NULL, *text_entry4 = NULL, *text_entry5 = NULL, *text_entry6 = NULL, *text_switch1 = NULL;
+	gboolean dialog1_switch1_state = FALSE;
+	const gchar *text_comboboxtext1 = NULL;
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+	
+	dialog1_comboboxtext1 = (GtkComboBoxText*)gtk_builder_get_object(builder, "dialog1_comboboxtext1");
+	dialog1_entry1 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry1");
+	dialog1_entry2 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry2");
+	dialog1_entry3 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry3");
+	dialog1_entry4 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry4");
+	dialog1_entry5 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry5");
+	dialog1_entry6 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry6");
+	dialog1_switch1 = (GtkSwitch*)gtk_builder_get_object(builder, "dialog1_switch1");
+			
+	switch(resp_id){
+		case GTK_RESPONSE_OK:
+				text_entry1 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry1));
+				text_entry2 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry2));
+				text_entry3 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry3));
+				text_entry5 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry5));
+				text_entry6 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry6));
+				dialog1_switch1_state = gtk_switch_get_state(dialog1_switch1);
+				text_comboboxtext1 = gtk_combo_box_text_get_active_text(dialog1_comboboxtext1);
+
+				if (dialog1_switch1_state){
+					text_switch1 = "OK";
+					text_entry4 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry4));
+				}
+				else{
+					text_switch1 = "- - -";
+					text_entry4 = "- - -";
+				}
+				if (gtk_tree_selection_get_selected(selection, &model, &iter) && g_utf8_strlen(text_entry1, -1) > 4)
+				{
+						gtk_list_store_set (liststore,  &iter,
+									  0, text_entry1,
+									  1, text_entry2,
+									  2, text_entry3,
+									  3, text_comboboxtext1,
+									  4, text_switch1,
+									  5, text_entry4,
+									  6, text_entry5,
+									  7, text_entry6,
+									  -1);
+					gtk_tree_view_set_model(GTK_TREE_VIEW(view), GTK_TREE_MODEL(liststore));
+				}
+				gtk_widget_destroy(GTK_WIDGET(dialog));
+				break;
+				case GTK_RESPONSE_NO:
+					gtk_entry_set_text(dialog1_entry1, " ");
+					gtk_entry_set_text(dialog1_entry2, " ");
+					gtk_entry_set_text(dialog1_entry3, " ");
+					gtk_entry_set_text(dialog1_entry4, " ");
+					gtk_entry_set_text(dialog1_entry5, " ");
+					gtk_entry_set_text(dialog1_entry6, " ");
+					gtk_switch_set_state(dialog1_switch1, FALSE);
+					gtk_combo_box_set_active(GTK_COMBO_BOX(dialog1_comboboxtext1), 0);
+					break;
+		default:
+				gtk_widget_destroy(GTK_WIDGET(dialog));
+				break;
+		}
+	
+}
+
+
+void dialog1_response1(GtkDialog *dialog, gint resp_id, gpointer user_data)
 {
 	GtkEntry *dialog1_entry1;
 	GtkEntry *dialog1_entry2;
@@ -348,7 +434,6 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 					text_switch1 = "- - -";
 					text_entry4 = "- - -";
 				}
-				
 				gtk_list_store_set (liststore, &iter,
 									  0, text_entry1,
 									  1, text_entry2,
@@ -358,8 +443,7 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 									  5, text_entry4,
 									  6, text_entry5,
 									  7, text_entry6,
-									  -1);
-				
+								  -1);
 				break;
 		default:
 				break;
@@ -371,26 +455,119 @@ void response_user(GtkDialog *dialog, gint resp_id, gpointer user_data)
 
 }
 
-void show_dialog(GtkWidget *item, gpointer user_data)
+void dialog1_edit(GtkWidget *widget, gpointer user_data)
 {
 	GError *error = NULL;
 	GtkWidget *dialog;
+	GtkWidget *button;
+	GApplication *app = g_application_get_default();
+	const gchar *basepath = g_application_get_resource_base_path(app);
+	gchar *path = g_build_path("/", basepath, "Gtk", "dialog1.ui", NULL);
+	gtk_builder_add_from_resource(builder, path, &error);
+	gtk_builder_connect_signals(builder, app);
+	dialog = (GtkWidget*)gtk_builder_get_object(builder, "dialog1");
+	button = (GtkWidget*)gtk_builder_get_object(builder, "dialog1_button3");
+	
+	gtk_window_set_title(GTK_WINDOW(dialog), "Edycja danych przelewu/wpłaty");
+	g_signal_connect(dialog, "response", G_CALLBACK(dialog1_response2), user_data);
+	
+	
+	GtkEntry *dialog1_entry1;
+	GtkEntry *dialog1_entry2;
+	GtkEntry *dialog1_entry3;
+	GtkEntry *dialog1_entry4;
+	GtkEntry *dialog1_entry5;
+	GtkEntry *dialog1_entry6;
+	GtkSwitch *dialog1_switch1;
+	GtkComboBoxText *dialog1_comboboxtext1;
+	GtkTreeIter iter;
+	
+	GtkTreeSelection *selection;
+	GtkTreeModel     *model;
+	
+	GtkTreeView *view = (GtkTreeView*)gtk_builder_get_object(builder, "treeview1");
+	GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(view)));
+
+	const gchar *text_entry1 = NULL, *text_entry2 = NULL, *text_entry3 = NULL, *text_entry4 = NULL, *text_entry5 = NULL, *text_entry6 = NULL, *text_switch1 = NULL;
+	gboolean dialog1_switch1_state = FALSE;
+	const gchar *text_comboboxtext1 = NULL;
+
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+	g_signal_connect(dialog, "response", G_CALLBACK(dialog1_response2), app);
+	if (gtk_tree_selection_get_selected(selection, &model, &iter))
+	{
+		gtk_tree_model_get (model, &iter, 0, &text_entry1, 1, &text_entry2, 2, &text_entry3, 3, &text_comboboxtext1, 4, &text_switch1, 5, &text_entry4, 6, &text_entry5, 7, &text_entry6, -1);
+    }
+	else
+	{
+		g_print ("no row selected.\n");
+	}
+	
+	dialog1_comboboxtext1 = (GtkComboBoxText*)gtk_builder_get_object(builder, "dialog1_comboboxtext1");
+	dialog1_entry1 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry1");
+	dialog1_entry2 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry2");
+	dialog1_entry3 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry3");
+	dialog1_entry4 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry4");
+	dialog1_entry5 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry5");
+	dialog1_entry6 = (GtkEntry*)gtk_builder_get_object(builder, "dialog1_entry6");
+	dialog1_switch1 = (GtkSwitch*)gtk_builder_get_object(builder, "dialog1_switch1");
+	
+	gtk_entry_set_text(dialog1_entry1, text_entry1);
+	gtk_entry_set_text(dialog1_entry2, text_entry2);
+	gtk_entry_set_text(dialog1_entry3, text_entry3);
+	gtk_entry_set_text(dialog1_entry4, text_entry4);
+	gtk_entry_set_text(dialog1_entry5, text_entry5);
+	gtk_entry_set_text(dialog1_entry6, text_entry6);
+	gint index = 0;
+	
+	if (g_strcmp0(text_comboboxtext1, "PLN") == 0)
+			index = 0;
+	if (g_strcmp0(text_comboboxtext1, "USD") == 0)
+			index = 1;
+	if (g_strcmp0(text_comboboxtext1, "EUR") == 0)
+			index = 4;
+	if (g_strcmp0(text_comboboxtext1, "GBP") == 0)
+			index = 2;
+	if (g_strcmp0(text_comboboxtext1, "CHF") == 0)
+			index = 3;			
+			
+	gtk_combo_box_set_active(GTK_COMBO_BOX(dialog1_comboboxtext1), index);
+	
+	if(g_strcmp0(text_switch1, "OK") == 0)
+		gtk_switch_set_state(dialog1_switch1, TRUE);
+	else
+		gtk_switch_set_state(dialog1_switch1, FALSE);
+	
+	
+	
+	gtk_dialog_run(GTK_DIALOG(dialog));
+}
+
+void dialog1_enter(GtkWidget *widget, gpointer user_data)
+{
+	GError *error = NULL;
+	GtkWidget *dialog;
+	GtkWidget *button;
 	GApplication *app = g_application_get_default();
 	const gchar *basepath = g_application_get_resource_base_path(app);
 	gchar *path = g_build_path("/", basepath, "Gtk", "dialog1.ui", NULL);
 	gtk_builder_add_from_resource(builder, path, &error);
 	gtk_builder_connect_signals(builder, NULL);
 	dialog = (GtkWidget*)gtk_builder_get_object(builder, "dialog1");
+	button = (GtkWidget*)gtk_builder_get_object(builder, "dialog1_button3");
+	gtk_widget_hide(button);
 	gtk_window_set_title(GTK_WINDOW(dialog), "Dane do przelewu/wpłaty");
-	g_signal_connect(dialog, "response", G_CALLBACK(response_user), user_data);
+	g_signal_connect(dialog, "response", G_CALLBACK(dialog1_response1), user_data);
 	gtk_dialog_run(GTK_DIALOG(dialog));
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
+
 
 void close_window(GtkWidget *widget,  gpointer user_data)
 {
 	g_application_quit(G_APPLICATION(user_data));
 }
+
 
 void activate(GApplication *app, gpointer user_data){
 
@@ -403,17 +580,23 @@ void activate(GApplication *app, gpointer user_data){
 	GtkWidget *icon;
 	GtkLinkButton *linkbutton;
 	
-	
+	GSimpleAction *action;
+		
 	window = (GtkWindow *) gtk_application_window_new(GTK_APPLICATION(app));
 	window = (GtkWindow *) gtk_builder_get_object(builder, "window1");
 	view = (GtkWidget *) gtk_builder_get_object(builder, "treeview1");
 	toolbar = (GtkToolbar*) gtk_builder_get_object(builder, "toolbar1");
 	title = g_strdup_printf("%s %s", g_get_application_name(), "1.50.1");
 	
-	icon = gtk_image_new_from_icon_name("gtk-add",GTK_ICON_SIZE_LARGE_TOOLBAR);
+	icon = gtk_image_new_from_icon_name("gtk-add",GTK_ICON_SIZE_SMALL_TOOLBAR);
 	toolitem = gtk_tool_button_new(icon, "Dodaj");
 	gtk_toolbar_insert(toolbar, toolitem, 0);
-	g_signal_connect(toolitem, "clicked", G_CALLBACK(show_dialog), app);
+	g_signal_connect(toolitem, "clicked", G_CALLBACK(dialog1_enter), app);
+	
+	icon = gtk_image_new_from_icon_name("gtk-edit",GTK_ICON_SIZE_SMALL_TOOLBAR);
+	toolitem = gtk_tool_button_new(icon, "Popraw");
+	gtk_toolbar_insert(toolbar, toolitem, 1);
+	g_signal_connect(toolitem, "clicked", G_CALLBACK(dialog1_edit), app);
 	
 	linkbutton = (GtkLinkButton*) gtk_builder_get_object(builder, "linkbutton1");
 	gtk_button_set_label(GTK_BUTTON(linkbutton), "MajsterKlepka GitHub Page(s)");
