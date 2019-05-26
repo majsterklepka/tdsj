@@ -49,7 +49,7 @@ check_transfer_payment(cairo_t *cr, double x_margin, double y_margin,
 {
 		cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
 		cairo_set_line_width(cr, 1.0);
-		if (check)
+		if (!check)
 		{
 			cairo_move_to(cr, x_margin + start + 6 * step,
 					y_margin + 24.5 + pole_height + 2.5);
