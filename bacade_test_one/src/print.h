@@ -47,20 +47,8 @@ typedef struct {
 	gboolean trans;	
 } FormData;
 
-void check_transfer_payment(cairo_t *cr, double x_margin, double y_margin, gboolean check);
-
-void draw_form_description(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, gchar *waluta);
-
-void draw_description_one(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, gchar *text);
-
-void draw_description_two(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, gchar *text);
-
-void draw_iban(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, gchar *text);
-
-void draw_amount(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, gchar *text);
 
 void draw_form(cairo_t *cr, PangoLayout *layout, double x_margin, double y_margin, FormData *form_data);
-
 
 
 #endif /* PRINT_H_ */

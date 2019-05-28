@@ -27,11 +27,59 @@ enum{
 	NUM_COLS
 };
 
+static void do_view(GSimpleAction *action, GVariant *parametr, gpointer user_data)
+{
+	PangoLayout *layout;
+	cairo_t *cr;
+	cairo_surface_t *surface;
+	
+	GtkWidget *win;
+		
+	gint width, height;
+	
+	width = 840;
+	height = 600;
+	
+	gchar *txt1, *txt2, *txt3, *txt4, *txt5, *txt6, *txt7, *txt8;
+	
+	GtkWidget *image;
+	
+	surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+	
+	cr = cairo_create(surface);
+	layout = pango_cairo_create_layout(cr);  
+	pango_layout_set_width(layout, width * PANGO_SCALE);
+	pango_layout_set_height(layout, height * PANGO_SCALE);
+	
+	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	g_signal_connect(win, "destroy", G_CALLBACK(gtk_widget_destroy), win);
+	gtk_window_set_title(GTK_WINDOW(win), "Podgląd");
+	gtk_window_set_default_size(GTK_WINDOW(win), 840, 600);
+	cairo_set_line_width(cr, 2);
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	cairo_rectangle(cr, 5, 5, 800, 40);
+	cairo_rectangle(cr, 5, 55, 800, 40);
+	cairo_stroke(cr);
+	GtkTreeModel *treemodel;
+	GtkTreeIter iter;
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
+	gtk_tree_selection_get_selected(selection, &treemodel, &iter);
+	gtk_tree_model_get(treemodel,&iter, COL_ADDRESS1, &txt1,COL_IBAN1 ,&txt2,COL_AMOUNT ,&txt3,COL_CURRENCY ,&txt4,COL_TRANSFER ,&txt5,COL_IBAN2 ,&txt6,COL_ADDRESS2 ,&txt7,COL_TITLE ,&txt8, -1);
+	
+	
+		
+	image = gtk_image_new_from_surface(surface);
+	gtk_container_add(GTK_CONTAINER(win), image);
+	gtk_widget_show_all(GTK_WIDGET(win));
+	
+}
+
 static void
 quit_app (GSimpleAction *action, GVariant *parametr, gpointer user_data)
 {
   GList *list, *next;
   GtkWindow *win;
+   
 
   g_print ("Going down...\n");
 
@@ -632,6 +680,7 @@ void new_window(GtkApplication *app)
 	GtkWidget *icon;
 	GtkWidget *linkbutton;
 	GtkStyleContext *style_context;
+	GtkToolItem *separator;
 	
 	window = gtk_application_window_new(app);
 	gtk_window_set_position(GTK_WINDOW(window),GTK_WIN_POS_CENTER_ALWAYS);
@@ -652,39 +701,67 @@ void new_window(GtkApplication *app)
 	
 	liststore = gtk_list_store_new(NUM_COLS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 	
+	icon = gtk_image_new_from_icon_name("gtk-open", GTK_ICON_SIZE_SMALL_TOOLBAR);
+	toolitem = gtk_tool_button_new(icon, "Otwórz");
+	gtk_tool_item_set_tooltip_text(toolitem, gtk_tool_button_get_label(GTK_TOOL_BUTTON(toolitem)));
+	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 0);
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "win.open");
+	gtk_widget_show(GTK_WIDGET(toolitem));
+	
+	icon = gtk_image_new_from_icon_name("gtk-save", GTK_ICON_SIZE_SMALL_TOOLBAR);
+	toolitem = gtk_tool_button_new(icon, "Zapisz");
+	gtk_tool_item_set_tooltip_text(toolitem, gtk_tool_button_get_label(GTK_TOOL_BUTTON(toolitem)));
+	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 1);
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "win.save");
+	gtk_widget_show(GTK_WIDGET(toolitem));
+	
+	icon = gtk_image_new_from_icon_name("gtk-save-as", GTK_ICON_SIZE_SMALL_TOOLBAR);
+	toolitem = gtk_tool_button_new(icon, "Zapisz jako");
+	gtk_tool_item_set_tooltip_text(toolitem, gtk_tool_button_get_label(GTK_TOOL_BUTTON(toolitem)));
+	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 2);
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "win.save-as");
+	gtk_widget_show(GTK_WIDGET(toolitem));
+	
+	separator = gtk_separator_tool_item_new();
+	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(separator), 3);
+	gtk_widget_show(GTK_WIDGET(separator));
+		
 	icon = gtk_image_new_from_icon_name("gtk-add", GTK_ICON_SIZE_SMALL_TOOLBAR);
 	toolitem = gtk_tool_button_new(icon, "Dodaj");
 	gtk_tool_item_set_tooltip_text(toolitem, gtk_tool_button_get_label(GTK_TOOL_BUTTON(toolitem)));
-	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 0);
+	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 4);
 	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "win.add");
 	gtk_widget_show(GTK_WIDGET(toolitem));
 	
 	icon = gtk_image_new_from_icon_name("gtk-remove", GTK_ICON_SIZE_SMALL_TOOLBAR);
 	toolitem = gtk_tool_button_new(icon, "Usuń");
 	gtk_tool_item_set_tooltip_text(toolitem, gtk_tool_button_get_label(GTK_TOOL_BUTTON(toolitem)));
-	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 1);
+	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 5);
 	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "win.remove");
 	gtk_widget_show(GTK_WIDGET(toolitem));
 	
 	icon = gtk_image_new_from_icon_name("gtk-edit", GTK_ICON_SIZE_SMALL_TOOLBAR);
 	toolitem = gtk_tool_button_new(icon, "Popraw");
 	gtk_tool_item_set_tooltip_text(toolitem, gtk_tool_button_get_label(GTK_TOOL_BUTTON(toolitem)));
-	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 2);
+	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 6);
 	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "win.correct");
 	gtk_widget_show(GTK_WIDGET(toolitem));
 	
+	separator = gtk_separator_tool_item_new();
+	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(separator), 7);
+	gtk_widget_show(GTK_WIDGET(separator));
 		
 	icon = gtk_image_new_from_icon_name("filefind", GTK_ICON_SIZE_SMALL_TOOLBAR);
 	toolitem = gtk_tool_button_new(icon, "Podgląd");
 	gtk_tool_item_set_tooltip_text(toolitem, gtk_tool_button_get_label(GTK_TOOL_BUTTON(toolitem)));
-	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 3);
+	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 8);
 	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "win.view");
 	gtk_widget_show(GTK_WIDGET(toolitem));
 	
 	icon = gtk_image_new_from_icon_name("gtk-print", GTK_ICON_SIZE_SMALL_TOOLBAR);
 	toolitem = gtk_tool_button_new(icon, "Drukuj");
 	gtk_tool_item_set_tooltip_text(toolitem, gtk_tool_button_get_label(GTK_TOOL_BUTTON(toolitem)));
-	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 4);
+	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 9);
 	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "win.print");
 	gtk_widget_show(GTK_WIDGET(toolitem));
 	
@@ -762,7 +839,7 @@ void new_window(GtkApplication *app)
 		{"add", dialog1_enter, NULL, NULL, NULL},
 		{"correct", dialog1_edit, NULL, NULL, NULL},
 		{"remove", dialog1_remove_row, NULL, NULL, NULL},
-		{"view", dialog1_edit, NULL, NULL, NULL},
+		{"view", do_view, NULL, NULL, NULL},
 		{"print", do_print, NULL, NULL, NULL}
 	};
 
@@ -784,8 +861,31 @@ void new_window(GtkApplication *app)
 	
 }
 
+static void
+about_app (GSimpleAction *action, GVariant *parameter, gpointer user_data)
+{
+	GError *error = NULL;
+	const gchar *authors[] = { "Paweł Sobótka",	NULL };
+	const gchar *artists[] = { "Paweł Sobótka", NULL };
+	const gchar *copyright = "(C)2017-2019 Paweł Sobótka";
+	const gchar *comment =_("This is free software \nyou can support them if you want");
+	const gchar *translator = "Paweł Sobótka <starywandal@onet.pl> : Polish, German, English, French, Spanish, Portuguese, Italian, Russian";
+	GdkPixbuf *icon = gdk_pixbuf_new_from_resource("/org/majsterklepka/bacade/img/icons64x64.png", &error);
+	const gchar *web = "https://majsterklepka.github.io/BaCaDe/";
+	
+	gtk_show_about_dialog(GTK_WINDOW(window), "authors", authors,
+			"artists", artists, "license-type", GTK_LICENSE_GPL_3_0, "logo", icon , "program-name",
+			g_get_application_name(), "version", "1.50.1", "comments",
+			comment, "website", web, "website-label", "Project GitHub Pages",
+			"copyright", copyright, "wrap-license", TRUE, "translator-credits", translator, NULL);
+	
+	
+}
 
-
+static void new_app(GSimpleAction *action, GVariant *parametr, gpointer user_data)
+{
+	g_application_activate(user_data);
+}
 
 void activate (GApplication *app, gpointer user_data)
 {
@@ -800,11 +900,21 @@ void startup(GApplication *app, gpointer user_data){
 	g_application_set_resource_base_path(app, "/org/majsterklepka/bacade");
 	g_resources_register(resource);
 	
-	builder = gtk_builder_new();
+	if (g_getenv ("APP_MENU_FALLBACK"))
+		g_object_set (gtk_settings_get_default (), "gtk-shell-shows-app-menu", FALSE, NULL);
+ 
+	builder = gtk_builder_new ();
+	gtk_builder_add_from_resource (builder, "/org/majsterklepka/bacade/Gtk/menu.ui", &error);
+    gtk_application_set_app_menu (GTK_APPLICATION (app), G_MENU_MODEL (gtk_builder_get_object (builder, "app-menu")));
+  g_object_unref (builder);
+	
+	
 
 
 	const GActionEntry entries[] = {
-		{"quit", quit_app, NULL, NULL, NULL}
+		{"quit", quit_app, NULL, NULL, NULL},
+		{"new", new_app, NULL, NULL, NULL},
+		{"about", about_app, NULL, NULL, NULL}
 	};
 
 	g_action_map_add_action_entries(G_ACTION_MAP(app), entries, G_N_ELEMENTS(entries), app);

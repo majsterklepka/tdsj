@@ -1,0 +1,19 @@
+<interface>
+	<menu id='app-menu'>
+		<section>
+			<item>
+				<attribute name='label' translatable='yes'>_Nowe okno</attribute>
+                <attribute name='action'>app.new</attribute>
+            </item>
+			<item>
+				<attribute name='label' translatable='yes'>O Progr_amie</attribute>
+				<attribute name='action'>app.about</attribute>
+			</item>
+			<item>
+				<attribute name='label' translatable='yes'>_Koniec</attribute>
+				<attribute name='action'>app.quit</attribute>
+				<attribute name='accel'>&lt;Primary&gt;q</attribute>
+			</item>
+		</section>
+	</menu>
+</interface>

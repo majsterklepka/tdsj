@@ -5,7 +5,7 @@ CFLAGS+=-rdynamic
 LIBS=$(shell pkg-config --libs gtk+-3.0)
 
 all: bacade-gresource.c bacade-gresource.h
-	$(CC) src/main.c src/print.c bacade-gresource.c -o bacade $(CFLAGS) $(LIBS)
+	$(CC) src/main.c src/print.c  bacade-gresource.c -o bacade $(CFLAGS) $(LIBS)
 
 bacade-gresource.c: bacade.gresource
 	$(glib-compile-resources) --c-name bacade --generate-source --target bacade-gresource.c bacade.gresource.xml
