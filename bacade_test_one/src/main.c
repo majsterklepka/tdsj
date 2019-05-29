@@ -8,12 +8,13 @@
 #include "print.h"
 #include <malloc.h>
 
-GtkBuilder *builder;
 GResource *resource;
 GList *active_prints;
 GtkPrintSettings *settings;
 GtkWidget *window;
 GtkWidget *treeview;
+gboolean user_edited_new_document;
+gchar *existing_filename;
 
 enum{
 	COL_ADDRESS1,
@@ -82,8 +83,14 @@ quit_app (GSimpleAction *action, GVariant *parametr, gpointer user_data)
    
 
   g_print ("Going down...\n");
-
-  list = gtk_application_get_windows (GTK_APPLICATION (g_application_get_default ()));
+  
+  GApplication *app = g_application_get_default ();
+  
+  if (app != NULL)
+	list = gtk_application_get_windows (GTK_APPLICATION (app));
+  else
+	list = NULL;
+	
   while (list)
     {
       win = list->data;
@@ -93,6 +100,18 @@ quit_app (GSimpleAction *action, GVariant *parametr, gpointer user_data)
 
       list = next;
     }
+    if (resource != NULL){
+		g_resources_unregister(resource);
+		g_resource_unref(resource);
+	}
+	
+	/*GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)));
+	if (liststore != NULL)	
+		gtk_list_store_clear(liststore);
+	*/
+	if(active_prints != NULL)
+		g_list_free1(active_prints);	
+
 }
 
 
@@ -146,7 +165,6 @@ void begin_print (GtkPrintOperation *operation, GtkPrintContext *context, PrintD
 	if (user_data->data_length > 0)	
 		gtk_print_operation_set_n_pages(operation, user_data->data_length);
 	else{
-		GtkWidget *window = (GtkWidget*)gtk_builder_get_object(builder, "window1");
 		GtkWidget *error_dialog;
 
 		error_dialog = gtk_message_dialog_new(GTK_WINDOW(window),
@@ -394,7 +412,17 @@ void dialog1_response2(GtkDialog *dialog, gint resp_id, gpointer user_data)
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GtkTreeSelection *selection;
+	GtkBuilder *builder;
+	GError *error = NULL;
 	
+	GApplication *app = g_application_get_default();
+	
+	const gchar *basepath = g_application_get_resource_base_path(app);
+	gchar *path = g_build_path("/", basepath, "Gtk", "dialog1.ui", NULL);
+	
+	builder = gtk_builder_new();
+	gtk_builder_add_from_resource(builder, path, &error);
+	gtk_builder_connect_signals(builder, app);	
 	
 	GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)));
 	
@@ -461,6 +489,8 @@ void dialog1_response2(GtkDialog *dialog, gint resp_id, gpointer user_data)
 				gtk_widget_destroy(GTK_WIDGET(dialog));
 				break;
 		}
+		
+		g_object_unref(builder);
 	
 }
 
@@ -502,9 +532,19 @@ void dialog1_response1(GtkDialog *dialog, gint resp_id, gpointer user_data)
 	GtkSwitch *dialog1_switch1;
 	GtkComboBoxText *dialog1_comboboxtext1;
 	GtkTreeIter iter;
+	GtkBuilder *builder;
+	GError *error = NULL;
 	
 	GtkListStore *liststore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)));
 	
+	GApplication *app = g_application_get_default();
+	
+	const gchar *basepath = g_application_get_resource_base_path(app);
+	gchar *path = g_build_path("/", basepath, "Gtk", "dialog1.ui", NULL);
+	
+	builder = gtk_builder_new();
+	gtk_builder_add_from_resource(builder, path, &error);
+	gtk_builder_connect_signals(builder, app);
 	
 	const gchar *text_entry1 = NULL, *text_entry2 = NULL, *text_entry3 = NULL, *text_entry4 = NULL, *text_entry5 = NULL, *text_entry6 = NULL, *text_switch1 = NULL;
 	gboolean dialog1_switch1_state = FALSE;
@@ -529,6 +569,7 @@ void dialog1_response1(GtkDialog *dialog, gint resp_id, gpointer user_data)
 				text_entry6 = gtk_entry_get_text(GTK_ENTRY(dialog1_entry6));
 				dialog1_switch1_state = gtk_switch_get_state(dialog1_switch1);
 				text_comboboxtext1 = gtk_combo_box_text_get_active_text(dialog1_comboboxtext1);
+				user_edited_new_document = TRUE;
 
 				if (dialog1_switch1_state){
 					text_switch1 = "OK";
@@ -553,6 +594,8 @@ void dialog1_response1(GtkDialog *dialog, gint resp_id, gpointer user_data)
 				break;
 	}
 	
+	g_object_unref(builder);
+	
 	gtk_tree_view_set_model(GTK_TREE_VIEW(treeview), GTK_TREE_MODEL(liststore));
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
 	gtk_tree_selection_select_iter(selection, &iter);
@@ -565,9 +608,14 @@ static void dialog1_edit(GSimpleAction *action, GVariant *parametr, gpointer use
 	GError *error = NULL;
 	GtkWidget *dialog;
 	GtkWidget *button;
+	GtkBuilder *builder;
+	
 	GApplication *app = g_application_get_default();
+	
 	const gchar *basepath = g_application_get_resource_base_path(app);
 	gchar *path = g_build_path("/", basepath, "Gtk", "dialog1.ui", NULL);
+	
+	builder = gtk_builder_new();
 	gtk_builder_add_from_resource(builder, path, &error);
 	gtk_builder_connect_signals(builder, app);
 	dialog = (GtkWidget*)gtk_builder_get_object(builder, "dialog1");
@@ -602,7 +650,7 @@ static void dialog1_edit(GSimpleAction *action, GVariant *parametr, gpointer use
 	
 	g_return_if_fail((gtk_tree_selection_get_selected(selection, &model, &iter)));
 
-	g_signal_connect(dialog, "response", G_CALLBACK(dialog1_response2), app);
+	g_signal_connect(dialog, "response", G_CALLBACK(dialog1_response2), NULL);
 	gtk_tree_model_get (model, &iter, 0, &text_entry1, 1, &text_entry2, 2, &text_entry3, 3, &text_comboboxtext1, 4, &text_switch1, 5, &text_entry4, 6, &text_entry5, 7, &text_entry6, -1);
     
 	
@@ -643,30 +691,124 @@ static void dialog1_edit(GSimpleAction *action, GVariant *parametr, gpointer use
 	
 	
 	gtk_dialog_run(GTK_DIALOG(dialog));
+	
+	g_object_unref(builder);
 }
 static void dialog1_enter(GSimpleAction *action, GVariant *parametr, gpointer user_data)
 {
 	GError *error = NULL;
 	GtkWidget *dialog;
 	GtkWidget *button;
+	GtkBuilder *builder;
+	
 	GApplication *app = g_application_get_default();
+	
 	const gchar *basepath = g_application_get_resource_base_path(app);
 	gchar *path = g_build_path("/", basepath, "Gtk", "dialog1.ui", NULL);
+	
+	builder = gtk_builder_new();
 	gtk_builder_add_from_resource(builder, path, &error);
 	gtk_builder_connect_signals(builder, NULL);
+	
 	dialog = (GtkWidget*)gtk_builder_get_object(builder, "dialog1");
 	button = (GtkWidget*)gtk_builder_get_object(builder, "dialog1_button3");
+	
 	gtk_widget_hide(button);
+	
 	gtk_window_set_title(GTK_WINDOW(dialog), "Dane do przelewu/wpłaty");
-	g_signal_connect(dialog, "response", G_CALLBACK(dialog1_response1), user_data);
+	g_signal_connect(dialog, "response", G_CALLBACK(dialog1_response1), NULL);
+	
 	gtk_dialog_run(GTK_DIALOG(dialog));
 	gtk_widget_destroy(GTK_WIDGET(dialog));
+	g_object_unref(builder);
 }
 
 
 void close_window(GtkWidget *widget,  gpointer user_data)
 {
 	g_application_quit(G_APPLICATION(user_data));
+}
+
+static void save_to_file(const gchar *filename)
+{
+	user_edited_new_document = FALSE;
+	gtk_window_set_title(GTK_WINDOW(window), filename);
+	existing_filename = g_strdup(filename);
+}
+
+static void save_file(GSimpleAction *action, GVariant *parametr, gpointer user_data)
+{
+GtkWidget *dialog;
+GtkFileChooser *chooser;
+GtkFileChooserAction make_action = GTK_FILE_CHOOSER_ACTION_SAVE;
+gint res;
+
+dialog = gtk_file_chooser_dialog_new ("Zapisz plik",
+                                      GTK_WINDOW(window),
+                                      make_action,
+                                      _("_Cancel"),
+                                      GTK_RESPONSE_CANCEL,
+                                      _("_Save"),
+                                      GTK_RESPONSE_ACCEPT,
+                                      NULL);
+chooser = GTK_FILE_CHOOSER (dialog);
+
+gtk_file_chooser_set_do_overwrite_confirmation (chooser, TRUE);
+
+if (user_edited_new_document)
+  gtk_file_chooser_set_current_name (chooser,
+                                     _("Untitled document"));
+else
+	gtk_file_chooser_set_filename (chooser,
+                                 existing_filename);
+                               
+
+res = gtk_dialog_run (GTK_DIALOG (dialog));
+if (res == GTK_RESPONSE_ACCEPT)
+  {
+    char *filename;
+
+    filename = gtk_file_chooser_get_filename (chooser);
+    save_to_file (filename);
+    g_free (filename);
+  }
+
+gtk_widget_destroy (dialog);
+}
+
+
+static void open_file(const gchar *filename)
+{
+	existing_filename = g_strdup(filename);
+}
+
+
+static void open_dialog(GSimpleAction *action, GVariant *parametr, gpointer user_data)
+{
+GtkWidget *dialog;
+GtkFileChooserAction make_action = GTK_FILE_CHOOSER_ACTION_OPEN;
+gint res;
+
+dialog = gtk_file_chooser_dialog_new ("Otwórz plik",
+                                      GTK_WINDOW(window),
+                                      make_action,
+                                      _("_Cancel"),
+                                      GTK_RESPONSE_CANCEL,
+                                      _("_Open"),
+                                      GTK_RESPONSE_ACCEPT,
+                                      NULL);
+
+res = gtk_dialog_run (GTK_DIALOG (dialog));
+if (res == GTK_RESPONSE_ACCEPT)
+  {
+    char *filename;
+    GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
+    filename = gtk_file_chooser_get_filename (chooser);
+    open_file (filename);
+    g_free (filename);
+  }
+
+gtk_widget_destroy (dialog);
 }
 
 void new_window(GtkApplication *app)
@@ -719,7 +861,7 @@ void new_window(GtkApplication *app)
 	toolitem = gtk_tool_button_new(icon, "Zapisz jako");
 	gtk_tool_item_set_tooltip_text(toolitem, gtk_tool_button_get_label(GTK_TOOL_BUTTON(toolitem)));
 	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 2);
-	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "win.save-as");
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "app.save-as");
 	gtk_widget_show(GTK_WIDGET(toolitem));
 	
 	separator = gtk_separator_tool_item_new();
@@ -762,7 +904,7 @@ void new_window(GtkApplication *app)
 	toolitem = gtk_tool_button_new(icon, "Drukuj");
 	gtk_tool_item_set_tooltip_text(toolitem, gtk_tool_button_get_label(GTK_TOOL_BUTTON(toolitem)));
 	gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM(toolitem), 9);
-	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "win.print");
+	gtk_actionable_set_action_name(GTK_ACTIONABLE(toolitem), "app.print");
 	gtk_widget_show(GTK_WIDGET(toolitem));
 	
 	linkbutton = gtk_link_button_new_with_label("http://majsterklepka.github.io",  "MajsterKlepka GitHub Page(s)");
@@ -835,7 +977,11 @@ void new_window(GtkApplication *app)
 
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(treeview), TRUE);
 
-	const GActionEntry entries[] = {
+
+
+const GActionEntry entries[] = {
+		{"open", open_dialog, NULL, NULL, NULL},
+		{"save", save_file, NULL, NULL, NULL},
 		{"add", dialog1_enter, NULL, NULL, NULL},
 		{"correct", dialog1_edit, NULL, NULL, NULL},
 		{"remove", dialog1_remove_row, NULL, NULL, NULL},
@@ -844,9 +990,7 @@ void new_window(GtkApplication *app)
 	};
 
 	g_action_map_add_action_entries(G_ACTION_MAP(window), entries, G_N_ELEMENTS(entries), GTK_WINDOW(window));
-
-
-
+	
 	gtk_tree_view_set_model(GTK_TREE_VIEW(treeview), GTK_TREE_MODEL(liststore));
 	gtk_container_add(GTK_CONTAINER(scrolledwindow), GTK_WIDGET(treeview));
 	gtk_widget_show(GTK_WIDGET(scrolledwindow));
@@ -855,7 +999,6 @@ void new_window(GtkApplication *app)
 	gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(linkbutton), 1,3, 1, 1);
 	gtk_widget_show(GTK_WIDGET(grid));
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
-	
 	gtk_widget_show_all(GTK_WIDGET(window));
 
 	
@@ -895,10 +1038,14 @@ void activate (GApplication *app, gpointer user_data)
 void startup(GApplication *app, gpointer user_data){
 
 	GError *error = NULL;
+	
+	GtkBuilder *builder;
 
 	resource = bacade_get_resource();
 	g_application_set_resource_base_path(app, "/org/majsterklepka/bacade");
 	g_resources_register(resource);
+	
+	user_edited_new_document = FALSE;
 	
 	if (g_getenv ("APP_MENU_FALLBACK"))
 		g_object_set (gtk_settings_get_default (), "gtk-shell-shows-app-menu", FALSE, NULL);
@@ -906,7 +1053,6 @@ void startup(GApplication *app, gpointer user_data){
 	builder = gtk_builder_new ();
 	gtk_builder_add_from_resource (builder, "/org/majsterklepka/bacade/Gtk/menu.ui", &error);
     gtk_application_set_app_menu (GTK_APPLICATION (app), G_MENU_MODEL (gtk_builder_get_object (builder, "app-menu")));
-  g_object_unref (builder);
 	
 	
 
@@ -919,6 +1065,7 @@ void startup(GApplication *app, gpointer user_data){
 
 	g_action_map_add_action_entries(G_ACTION_MAP(app), entries, G_N_ELEMENTS(entries), app);
 	
+	g_object_unref(builder);
 	active_prints = NULL;
 
 	Set_Icons();
@@ -971,14 +1118,14 @@ int main(int argc, char **argv)
 	
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
-	g_signal_connect(app, "shutdown", G_CALLBACK(quit_app), NULL);
+	//g_signal_connect(app, "shutdown", G_CALLBACK(quit_app), NULL);
 	status = g_application_run(G_APPLICATION(app), argc, argv);
 	g_application_register(G_APPLICATION(app), cancellable, &error);
 	
-	clear_app();
+	//clear_app();
 	}else
 		status = -1;
-
+		
 	return status;
 
 
