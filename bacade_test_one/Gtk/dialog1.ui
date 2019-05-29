@@ -361,5 +361,4 @@
       <action-widget response="-5">dialog1_button1</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkListStore" id="liststore1"/>
 </interface>
