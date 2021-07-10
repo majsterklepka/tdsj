@@ -9,7 +9,16 @@
 int latchPin = 8;
 int clockPin = 12;
 int dataPin = 11;
-int dataIn[] = {0,1,2,4,8,16,32,64,128,256,255};
+int dataIn[] = {B00000000,
+                B00000001,
+                B00000010,
+                B00000100,
+                B00001000,
+                B00010000,
+                B00100000,
+                B01000000,
+                B10000000,
+                B11111111};
 
 void setup() {
   pinMode(latchPin, OUTPUT);
@@ -18,7 +27,7 @@ void setup() {
 }
 
 void loop() {
-  for (int numberDisplay = 0; numberDisplay < 11; numberDisplay++)
+  for (int numberDisplay = 0; numberDisplay < 10; numberDisplay++)
   {
   
     digitalWrite(latchPin, LOW);
